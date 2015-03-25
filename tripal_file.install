@@ -57,49 +57,26 @@ function tripal_file_requirements($phase) {
  */
 function tripal_file_install() {
 
-  // EXPLANATION: If your module will making data publicly available for
-  // download or use by the site you can create the directory using the
-  // tripal_create_files_dir() function.  This will create a directory
-  // in the public access directory which will typcially be in
-  // sites/default/files/tripal/[module name]/
-
   // create the module's data directory
   tripal_create_files_dir('tripal_file');
 
   // EXPLANATION: Here is a good place to add any materialized views,
-  // controlled vocabularies CV, databases or CV terms needed by your module.
-  // To keep this module code short, create functions to do each of those
-  // tasks
-
-  // add any materialized view
   tripal_file_add_mviews();
 
   // add any external databases used by the file module.
   tripal_file_add_dbs();
 
-  // add any controlled vocabularies used by the file module. You may need
-  // to add a vocabulary if you to set it as default (see next lines of code).
-  // For file, the Sequence Ontology (SO) is used by the feature module as the
-  // default vocabulary for the feature type_id field.  But, that vocabulary
-  // does not yet exist in Chado until after the SO is loaded using the
-  // Tripal OBO loader.  But, we can add it here as a placeholder so that we can
-  // then set it as a default vocabulary (see below).
+  // add any controlled vocabularies used by the file module. 
   tripal_file_add_cvs();
 
 
   // add any controlled vocabulary terms
   tripal_file_add_cvterms();
 
-  // EXPLANATION: Many tables in Chado have a 'type_id' column which allows for
-  // association of controlled vocabulries to describe the record.   Chado
-  // places no restrictions on which vocabularies can be used, but Tripal can
-  // be instructed to provide a default vocabulary for any given field. For
-  // file, the feature.type_id column will typically use the Sequence Ontology
-  // In that case, we can use the tripal_set_default_cv() function to specify
+	// use the tripal_set_default_cv() function to specify
   // the Sequence Ontology (sequence) as the default vocabulary.
   tripal_set_default_cv('file', 'type_id', 'file_type');
-  tripal_set_default_cv('fileprop', 'type_id', 'file_property');
-  tripal_set_default_cv('file_relationship', 'type_id', 'file_relationship');
+
 
   // add any custom tables. For this case we will add an 'file' table to the
   // chado schema
@@ -121,60 +98,11 @@ function tripal_file_uninstall() {
 /**
  * Implementation of hook_schema().
  *
- * Provides a list of tables to be created inside of the Drupal schema
- * (the 'public' schema by default). It uses the Drupal Schema API
- * array structure to define the table, its indexes and constraints.
- *
- * Schema API documentation is here:
- * https://api.drupal.org/api/drupal/includes%21database%21schema.inc/group/schemaapi/7
- *
  * @ingroup tripal_file
  */
 function tripal_file_schema() {
 
-  // EXPLANATION: If your module creates a node type for data in the Chado
-  // database then you probably need to link Drupal nodes with a respective
-  // ID in the Chado table.  The following is an file array for a table
-  // that will link the 'chado_file' node type (created by this file
-  // module) with a record in the fake Chado file table.  This table
-  // will link the 'nid' of the node with the 'file_id' of the eample
-  // record.
- /*  $schema['chado_file'] = array(
-    'fields' => array(
-      'vid' => array(
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 0
-       ),
-      'nid' => array(
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 0
-       ),
-      'file_id' => array(
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0
-      ),
-      'sync_date' => array(
-        'type' => 'int',
-        'not null' => FALSE,
-        'description' => 'UNIX integer sync date/time'
-      ),
-    ),
-    'indexes' => array(
-      'chado_file_idx1' => array('file_id')
-    ),
-    'unique keys' => array(
-      'chado_file_uq1' => array('nid', 'vid'),
-      'chado_file_uq2' => array('vid')
-    ),
-    'primary key' => array('nid'),
-  );
 
-  return $schema; */
 };
 
 /**
@@ -192,14 +120,7 @@ function tripal_file_add_mviews() {
  * @ingroup tripal_file
  */
 function tripal_file_add_dbs() {
-  // EXPLANATION: use the tripal_insert_db() function to add any
-  // external databases needed by your module.  If the database already
-  // exists then the function will gracefully return.
-/* 
-  tripal_insert_db(array(
-    'name' => 'file_db',
-    'description' => 'An file database.'
-  )); */
+
 }
 /**
  * Add cvs related to publications
