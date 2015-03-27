@@ -150,10 +150,10 @@ function tripal_file_add_cvterms() {
 
   //Insert some terms for the file type cv
 	tripal_insert_cvterm(array(
-			'id'         => 'txt',         // the term accession
-			'name'       => 'TXT',    // the human readable term name
-			'cv_name'    => 'file_type', // the CV name this term belongs to.
-			'definition' => 'txtualization',
+	 'id'         => 'txt',         // the term accession
+	 'name'       => 'TXT',    // the human readable term name
+	 'cv_name'    => 'file_type', // the CV name this term belongs to.
+	 'definition' => 'txtualization',
 			//'db_name'    => 'file_db',   // the database in which the term is found.
 	));
   
@@ -196,11 +196,8 @@ function tripal_file_add_custom_tables() {
 
 
   tripal_file_add_file_table();
-  tripal_file_add_organism_file();
-  //Do not believe these tables are needed.
-  //tripal_file_add_fileprop_table();
-  //tripal_file_add_file_relationship_table();
-  //tripal_file_add_file_dbxref_table();
+  tripal_file_add_organism_file_table();
+
 }
 /*
  * A linker table for organisms and files
@@ -225,11 +222,11 @@ function tripal_file_add_organism_file_table()
 			    ),
 			),
 			'primary key' => array(
-					0 => 'organism_file_id',
+				0 => 'organism_file_id',
 			),
 	);	//end table array
-			chado_create_custom_table('file', $schema, TRUE);
-	}		
+			chado_create_custom_table('organism_file', $schema, TRUE);
+}		
 
 
 /**
@@ -272,19 +269,7 @@ function tripal_file_add_file_table() {
  * This is the required update for tripal_file.
  */
 function tripal_file_update_7200() {
-  // EXPLANATION: as you create new releases of your module you may find that
-  // tables your module created, or data may need to be adjusted. This function
-  // allows you to do that. This function is executed using the
-  // http://[your site]/update.php  URL or using the drush command 'updatedb'.
-  // This function should be named according to the instructions provided here:
-  // https://api.drupal.org/api/drupal/modules%21system%21system.api.php/function/hook_update_N/7
-  //
-  // It is best not to use Tripal API calls inside of this function because an
-  // upgarde from Drupal 6 to Drupal 7 requires that all modules be disabled
-  // which means the Tripal API is not available.  This is an unfortunate
-  // requirement, but will prevent errors during a major upgrade.
 
-  // it is good to wrap any database changes inside of a try catch block:
   try {
    // perform database changes
   }
@@ -301,11 +286,6 @@ function tripal_file_update_7200() {
 function tripal_file_update_dependencies() {
   $dependencies = array();
 
-  // EXPLANATION: here we can specify which modules must be updated prior
-  // to applying the updates in this module.  This is useful because it
-  // prevents updates from being executed out of order.  The following
-  // file code shows that the 'tripal_file' module update number 7200
-  // must be executed after the 'tripal_cv' module's 7200 update.
   $dependencies['tripal_file'][7200] = array(
     'tripal_cv' => 7200
   );

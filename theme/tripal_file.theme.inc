@@ -110,3 +110,52 @@ function tripal_file_preprocess_tripal_file_relationships(&$variables) {
   }
   $file->all_relationships = $relationships;
 }
+
+
+//All the preprocessing should go here
+function tripal_file_preprocess_tripal_file_generic(&$variables) {
+	$incomingNode = $variables['node'];
+	//Make sure the node has a type!
+	if($incomingNode->type == null) {
+		return;
+	}
+	
+	$fileToAdd = 'No files have been added';
+	switch($incomingNode->type) {
+	  case 'chado_organism':	
+	    // This could be one object or many... (I think)
+	    $values = array(
+	      'organism_id' => $incomingNode->vid,
+	    );
+	    //What does this return when there are no matches?
+	    $file_linker = tripal_core_generate_chado_var('organism_file', $values);
+	    if($file_linker != null) {	
+	      // Check to see if I have an array or a variable	
+	     
+	  	  if(is_array($file_linker)) {
+	  	  	 foreach ($file_linker as &$file_link) {
+	  	  	 	$look_for = array(
+	  	  	 	  'file_id' => $file_link-> file_id, 		
+	  	  	 	);
+	  	  	 	$fileToAdd[] = tripal_core_generate_chado_var('file',$look_for);   	
+	  	  	 }
+	  	  // There is only one file added to this node
+	  	  }else { 
+	  	  	$look_for = array(
+	  	  	  'file_id' => $file_linker-> file_id,
+	  	  	);
+	  	  	$fileToAdd = tripal_core_generate_chado_var('file',$look_for);
+	  	  }
+ 
+	  	// If file linker is null there are no items to display  
+	    }else {
+ 	  	 
+	    }  
+	  break;
+	  
+	  default:
+	  	break;
+	};
+	$variables['files'] = $fileToAdd; 
+
+}

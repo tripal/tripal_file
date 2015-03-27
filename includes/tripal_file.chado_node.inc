@@ -184,18 +184,20 @@ function tripal_file_node_view($node, $view_mode, $langcode) {
   // when thhe node is displayed. It is node type agnostic so we can add
   // content to any node type.  So, we use this function to add the content
   // from all of our theme templates onto our new node type. We will also
-  // use this function to add content to other node types.
-
+  // use this function to add content to other node types.	
   switch ($node->type) {
     case 'chado_organism':
       if ($view_mode == 'full') {
-        $node->content['tripal_file_generic'] = array(
-          '#markup' => theme('tripal_file_generic', array('node' => $node)), 		
-          '#tripal_toc_id'    => 'files',
-          '#tripal_toc_title' => 'files',
+        $node->content['tripal_file_generic'] = array (
+          '#markup' => theme('tripal_file_generic', array ( 
+          	'node' => $node,
+          	'files'=> NULL,    		
+          ) ), 		
+          '#tripal_toc_id'    => 'the files',
+          '#tripal_toc_title' => 'The Files',
         );
       }
       break;
     // ... etc
-  }
+  };
 }
