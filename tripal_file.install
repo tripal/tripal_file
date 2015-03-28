@@ -149,19 +149,19 @@ function tripal_file_add_cvs() {
 function tripal_file_add_cvterms() {
 
   //Insert some terms for the file type cv
-	tripal_insert_cvterm(array(
-			'id'         => 'txt',         // the term accession
-			'name'       => 'TXT',    // the human readable term name
-			'cv_name'    => 'file_type', // the CV name this term belongs to.
-			'definition' => 'txtualization',
-			//'db_name'    => 'file_db',   // the database in which the term is found.
+  tripal_insert_cvterm(array(
+		'id'         => 'txt',         // the term accession
+		'name'       => 'TXT',    // the human readable term name
+		'cv_name'    => 'file_type', // the CV name this term belongs to.
+		'definition' => 'Cuz I\'m T.X.T! I\'m dynamite!',
+		//'db_name'    => 'file_db',   // the database in which the term is found.
 	));
   
   tripal_insert_cvterm(array(
-    'id'         => 'fasta',         // the term accession
-    'name'       => 'FASTA',    // the human readable term name
-    'cv_name'    => 'file_type', // the CV name this term belongs to.
-    'definition' => 'Free Agents Symmetrically Testing Algea',
+    	'id'         => 'fasta',         // the term accession
+    	'name'       => 'FASTA',    // the human readable term name
+    	'cv_name'    => 'file_type', // the CV name this term belongs to.
+    	'definition' => 'Free Agents Symmetrically Testing Algea',
     //'db_name'    => 'file_db',   // the database in which the term is found.
   ));
   tripal_insert_cvterm(array(
@@ -182,7 +182,7 @@ function tripal_file_add_cvterms() {
   		'id'         => 'bam',         // the term accession
   		'name'       => 'BAM',    // the human readable term name
   		'cv_name'    => 'file_type', // the CV name this term belongs to.
-  		'definition' => 'BAYUM',
+  		'definition' => 'Brotato As Man',
   		//'db_name'    => 'file_db',   // the database in which the term is found.
   ));
 }
@@ -196,18 +196,192 @@ function tripal_file_add_custom_tables() {
 
 
   tripal_file_add_file_table();
-  tripal_file_add_organism_file();
+  tripal_file_add_file_source_table();
+  tripal_file_add_file_prop_table();
+  tripal_file_add_stock_file_table();
+  tripal_file_add_feature_file_table();
+  tripal_file_add_analysis_file_table();
+  tripal_file_add_organism_file_table();
+  
   //Do not believe these tables are needed.
   //tripal_file_add_fileprop_table();
   //tripal_file_add_file_relationship_table();
   //tripal_file_add_file_dbxref_table();
 }
-/*
+/**
  * A linker table for organisms and files
  * 
  */
-function tripal_file_add_organism_file_table()
-{
+
+/**
+ * Adds the 'file' custom table to Chado.
+ *
+ * @ingroup tripal_file
+ */
+function tripal_file_add_file_table() {
+	// EXPLANATION: use the Drupal Schema API to describe the custom table. Then
+	// add the table using the chado_create_custom_table() function.
+	$schema = array(
+			'table' => 'file',
+			'fields' => array(
+				'file_id' => array(
+					'type' => 'serial',
+					'not null' => TRUE,
+					),
+				'type_id' => array(
+					'type' => 'int',
+					'not null' => TRUE,
+					),
+				'description' => array(
+					'type' => 'text',
+					),
+				'uri' => array(
+					'type' =>'text',
+					),
+			),
+			'primary key' => array(
+			 	0 => 'file_id',
+			),
+	);
+	
+		chado_create_custom_table('file', $schema, TRUE);
+}
+
+function tripal_file_add_file_source_table(){
+	$schema = array(
+			'table' => 'file_source',
+			'fields' => array(
+				'file_source_id' => array(
+					'type' => 'serial',
+					'not null' => TRUE,
+					),
+				'file_id' => array(
+					'type' => 'int',
+					'not null' => TRUE,
+					),
+				'contact_id' => array(
+					'type' => 'int',
+					),
+				'license' => array(
+					'type' => 'text',
+					),
+				'rank' => array(
+					'type' => 'int',
+					'not null' => TRUE,
+					),
+			),
+			'primary key' => array(
+				0 => 'file_source_id',
+			),
+	);
+	
+		chado_create_custom_table('file_source', $schema, TRUE);
+}
+
+function tripal_file_add_file_prop_table(){
+	$schema = array(
+			'table' => 'file_prop',
+			'fields' => array(
+				'file_prop_id' => array(
+					'type' => 'serial',
+					'not null' => TRUE,
+					),
+				'file_id' => array (
+					'type' => 'int',
+					'not null' => TRUE,
+					),
+				'type_id' => array(
+					'type' => 'int',
+					'not null' => TRUE,
+					),
+				'value' => array(
+					'type' => 'text',
+					),
+			),
+			'primary key' => array(
+				0 => 'file_prop_id',
+			),
+	);
+		chado_create_custom_table('file_prop', $schema, TRUE);
+}
+
+function tripal_file_add_stock_file_table(){
+	$schema = array(
+			'table' => 'stock_file',
+			'fields' => array(
+				'stock_file_id' => array(
+					'type' => 'serial',
+					'not null' => TRUE,
+					),
+				'file_id' => array(
+					'type' => 'int',
+					'not null' => TRUE,
+					),
+				'stock_id' => array(
+					'type' => 'int',
+					'not null' => TRUE,
+					),
+			),
+			'primary key' => array(
+				0 => 'stock_file_id',
+			),
+	);
+	
+		chado_create_custom_table('stock_file', $schema, TRUE);
+}
+
+function tripal_file_add_feature_file_table(){
+	$schema = array(
+			'table' => 'feature_file',
+			'fields' => array(
+				'feature_file_id' => array(
+					'type' => 'serial',
+					'not null' => TRUE,
+					),
+				'file_id' => array(
+					'type' => 'int',
+					'not null' => TRUE,
+					),
+				'feature_id' => array(
+					'type' => 'int',
+					'not null' => TRUE,
+					),
+			),
+			'primary key' => array(
+				0 => 'feauture_file_id',
+			),
+	);
+	
+		chado_create_custom_table('feature_file', $schema, TRUE);
+}
+
+function tripal_file_add_analysis_file_table(){
+	
+	$schema = array(
+			'table' => 'analysis_file',
+			'fields' => array(
+				'analysis_file_id' => array(
+					'type' => 'serial',
+					'not null' => TRUE,
+					),
+				'file_id' => array(
+					'type' => 'int',
+					'not null' => TRUE,
+					),
+				'analysis_id' => array(
+					'type' => 'int',
+					'not null' => TRUE,
+					),
+			),
+			'primary key' => array(
+				0 => 'analysis_file_id',
+			),
+	);
+	
+		chado_create_custom_table('analysis_file', $schema, TRUE);
+}
+
+function tripal_file_add_organism_file_table(){
 	$schema = array(
 		'table' => 'organism_file',
 		'fields' => array(
@@ -225,45 +399,15 @@ function tripal_file_add_organism_file_table()
 			    ),
 			),
 			'primary key' => array(
-					0 => 'organism_file_id',
+			  0 => 'organism_file_id',
 			),
-	);	//end table array
-			chado_create_custom_table('file', $schema, TRUE);
-	}		
+	);
+	
+		chado_create_custom_table('organism_file', $schema, TRUE);
+}		
 
 
-/**
- * Adds the 'file' custom table to Chado.
- *
- * @ingroup tripal_file
- */
-function tripal_file_add_file_table() {
-  // EXPLANATION: use the Drupal Schema API to describe the custom table. Then
-  // add the table using the chado_create_custom_table() function.
-  $schema = array(
-    'table' => 'file',
-    'fields' => array(
-      'file_id' => array(
-        'type' => 'serial',
-        'not null' => true,
-      ),
-      'type_id' => array(
-        'type' => 'int',
-        'not null' => true,
-      ),
-      'description' => array(
-        'type' => 'text',
-      ),
-      'uri' => array(
-      'type' =>'text',		
-      ), 			
-    ),
-    'primary key' => array(
-      0 => 'file_id',
-    ),
-  );	//end table array
-  chado_create_custom_table('file', $schema, TRUE);
-}
+
 
 
 
