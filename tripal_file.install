@@ -196,12 +196,14 @@ function tripal_file_add_custom_tables() {
 
 
   tripal_file_add_file_table();
+  tripal_file_add_license_table();
   tripal_file_add_file_source_table();
   tripal_file_add_file_prop_table();
   tripal_file_add_stock_file_table();
   tripal_file_add_feature_file_table();
   tripal_file_add_analysis_file_table();
   tripal_file_add_organism_file_table();
+  
   
   //Do not believe these tables are needed.
   //tripal_file_add_fileprop_table();
@@ -226,17 +228,36 @@ function tripal_file_add_file_table() {
 			'fields' => array(
 				'file_id' => array(
 					'type' => 'serial',
-					'not null' => TRUE,
+					'not null' => TRUE
+					),
+				'file_data' => array(
+					'type' => 'text'
 					),
 				'type_id' => array(
 					'type' => 'int',
-					'not null' => TRUE,
+					'not null' => TRUE
+					),
+				'name' => array(
+					'type' => 'text'
 					),
 				'description' => array(
 					'type' => 'text',
 					),
-				'uri' => array(
+				'relative_url' => array(
 					'type' =>'text',
+					'not null' => TRUE
+					),
+				'db_id' => array(
+					'type' => 'integer',
+					'not null' => TRUE	
+					),
+				'fileloc_id' => array(
+					'type' => 'int',
+					'not null' => TRUE
+					),
+				'timelastmodified' => array(
+					'type' => 'timestamp without time zone',
+					'not null' => TRUE
 					),
 			),
 			'primary key' => array(
@@ -247,31 +268,62 @@ function tripal_file_add_file_table() {
 		chado_create_custom_table('file', $schema, TRUE);
 }
 
+function tripal_file_add_license_table(){
+	$schema = array(
+			'table' => 'license',
+			'fields' => array(
+				'license_id' => array(
+					'type' => 'integer',
+					'not null' => TRUE
+					),
+				'name' => array(
+					'type' => 'varchar',
+					'length' => 1024
+					),
+				'url' => array(
+					'type' => 'text'
+					),
+				'license_text' => array(
+					'type' => 'text'
+					),
+				'summary' => array(
+					'type' => 'text'
+					),
+			),
+			'primary key' => array(
+				0 => 'license_id'
+			),
+	);
+	
+		chado_create_custom_table('license', $schema, TRUE);
+}
+
 function tripal_file_add_file_source_table(){
 	$schema = array(
 			'table' => 'file_source',
 			'fields' => array(
 				'file_source_id' => array(
 					'type' => 'serial',
-					'not null' => TRUE,
+					'not null' => TRUE
 					),
 				'file_id' => array(
 					'type' => 'int',
-					'not null' => TRUE,
+					'not null' => TRUE
 					),
 				'contact_id' => array(
-					'type' => 'int',
+					'type' => 'int'
 					),
 				'license' => array(
-					'type' => 'text',
+					'type' => 'text'
 					),
 				'rank' => array(
 					'type' => 'int',
 					'not null' => TRUE,
+					'default' => 0
 					),
 			),
 			'primary key' => array(
-				0 => 'file_source_id',
+				0 => 'file_source_id'
 			),
 	);
 	
@@ -280,29 +332,29 @@ function tripal_file_add_file_source_table(){
 
 function tripal_file_add_file_prop_table(){
 	$schema = array(
-			'table' => 'file_prop',
+			'table' => 'fileprop',
 			'fields' => array(
 				'file_prop_id' => array(
 					'type' => 'serial',
-					'not null' => TRUE,
+					'not null' => TRUE
 					),
 				'file_id' => array (
 					'type' => 'int',
-					'not null' => TRUE,
+					'not null' => TRUE
 					),
 				'type_id' => array(
 					'type' => 'int',
-					'not null' => TRUE,
+					'not null' => TRUE
 					),
 				'value' => array(
-					'type' => 'text',
+					'type' => 'text'
 					),
 			),
 			'primary key' => array(
-				0 => 'file_prop_id',
+				0 => 'file_prop_id'
 			),
 	);
-		chado_create_custom_table('file_prop', $schema, TRUE);
+		chado_create_custom_table('fileprop', $schema, TRUE);
 }
 
 function tripal_file_add_stock_file_table(){
@@ -311,19 +363,19 @@ function tripal_file_add_stock_file_table(){
 			'fields' => array(
 				'stock_file_id' => array(
 					'type' => 'serial',
-					'not null' => TRUE,
+					'not null' => TRUE
 					),
 				'file_id' => array(
 					'type' => 'int',
-					'not null' => TRUE,
+					'not null' => TRUE
 					),
 				'stock_id' => array(
 					'type' => 'int',
-					'not null' => TRUE,
+					'not null' => TRUE
 					),
 			),
 			'primary key' => array(
-				0 => 'stock_file_id',
+				0 => 'stock_file_id'
 			),
 	);
 	
@@ -336,19 +388,19 @@ function tripal_file_add_feature_file_table(){
 			'fields' => array(
 				'feature_file_id' => array(
 					'type' => 'serial',
-					'not null' => TRUE,
+					'not null' => TRUE
 					),
 				'file_id' => array(
 					'type' => 'int',
-					'not null' => TRUE,
+					'not null' => TRUE
 					),
 				'feature_id' => array(
 					'type' => 'int',
-					'not null' => TRUE,
+					'not null' => TRUE
 					),
 			),
 			'primary key' => array(
-				0 => 'feauture_file_id',
+				0 => 'feauture_file_id'
 			),
 	);
 	
@@ -362,19 +414,19 @@ function tripal_file_add_analysis_file_table(){
 			'fields' => array(
 				'analysis_file_id' => array(
 					'type' => 'serial',
-					'not null' => TRUE,
+					'not null' => TRUE
 					),
 				'file_id' => array(
 					'type' => 'int',
-					'not null' => TRUE,
+					'not null' => TRUE
 					),
 				'analysis_id' => array(
 					'type' => 'int',
-					'not null' => TRUE,
+					'not null' => TRUE
 					),
 			),
 			'primary key' => array(
-				0 => 'analysis_file_id',
+				0 => 'analysis_file_id'
 			),
 	);
 	
@@ -383,34 +435,28 @@ function tripal_file_add_analysis_file_table(){
 
 function tripal_file_add_organism_file_table(){
 	$schema = array(
-		'table' => 'organism_file',
-		'fields' => array(
-		   'organism_file_id' => array(
-		     'type' => 'serial',
-			 'not null' => TRUE,
-			  ),
-		   'organism_id' => array(
-			  'type' => 'int',
-			  'not null' => TRUE,
-			   ),
-		   'file_id' => array(
-   			  'type' => 'int',
-		   	  'not_null'=> TRUE	
-			    ),
+			'table' => 'organism_file',
+			'fields' => array(
+		   		'organism_file_id' => array(
+		     		'type' => 'serial',
+			 		'not null' => TRUE
+			  		),
+		   		'organism_id' => array(
+			  		'type' => 'int',
+			  		'not null' => TRUE
+			   		),
+		   		'file_id' => array(
+   			  		'type' => 'int',
+		   	  		'not_null'=> TRUE
+			    	),
 			),
 			'primary key' => array(
-			  0 => 'organism_file_id',
+			 	0 => 'organism_file_id'
 			),
 	);
 	
 		chado_create_custom_table('organism_file', $schema, TRUE);
 }		
-
-
-
-
-
-
 
 /**
  * This is the required update for tripal_file.
