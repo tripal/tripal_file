@@ -350,25 +350,32 @@ function tripal_file_form_submit($form, &$form_state) {
  						
 	);
  	//Insert into the file table
- 	tripal_core_chado_insert('file',$fields);
+ 	$newFile = tripal_core_chado_insert('file',$fields);
+ 	//If the new file == ffalse then the file didn't successfully add to the table and
+ 	//the rest of this function is purposeless
+ 	if($newFile === FALSE)
+ 	{
+ 		return;
+ 	}
  	
  	//The tripal_dile_node_type will determine what type of linker file is utilized
- 	switch($form['tripal_file_format']['tripal_file_node_type']) {
+ 	switch($form['tripal_file_format']['tripal_file_node_type']['#value']) {
 	  case 'chado_organism':
  	  //Grab the id of the node submitting the file
- 	  $organism_id = $form['tripal_file_format']['tripal_file_node_id'];
+
  	  $organismFilefields = array(
- 	  	'file_id' => 'TODO',//Get file from TABLE WHERE 
- 	  	'organism_id' => $organism_id,	
+ 	  	'file_id' => $newFile['file_id'],//Get file from the array
+ 	  	'organism_id' => $form['tripal_file_format']['tripal_file_node_id']['#value'],	
  	); 
+ 	  
  	// Insert these fields into the linker table  
  	tripal_core_chado_insert('organism_file',$organismFilefields);
 	break;
 	default:
+		//TODO: add more
 	break;
  	};
- 
- 	
+
 	drupal_set_message(t('File has been added')); 
 } 
 
@@ -471,7 +478,10 @@ function tripal_file_theme($existing, $type, $theme, $path) {
 
     // tripal_organism templates
     'tripal_file_generic' => array(
-      'variables' => array('node' => NULL),
+      'variables' => array (
+      	 'node' => NULL,
+      	 'files'=> NULL,
+      ),
       'template' => 'tripal_file_generic',
       'path' => "$path/theme/templates",
     ),
@@ -524,7 +534,7 @@ function tripal_file_cron() {
  */
 function tripal_file_form_alter(&$form, &$form_state, $form_id) {
   
-	dpm($form);
+	//dpm($form);
 	if ($form['#node']-> type == 'chado_organism') {
 		$node_id = $form['#node']-> vid;
 		$node_type = $form['#node']-> type; 
