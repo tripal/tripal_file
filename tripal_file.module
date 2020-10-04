@@ -32,23 +32,24 @@ function tripal_file_views_api() {
 /**
  * Implements hook_bundle_fields_info_alter().
  */
-function tripal_file_bundle_fields_info_alter(&$info, $entity_type, $bundle) {
+function tripal_file_bundle_fields_info_alter(&$info, $bundle, $term) {
 
 }
 
 /**
  * Implements hook_bundle_fields_info_alter().
  */
-function tripal_file_bundle_instances_info_alter(&$info, $entity_type, $bundle) {
+function tripal_file_bundle_instances_info_alter(&$info, $bundle, $term) {
+
   // Fields for the File content type.
-  if ($bundle->vocab->vocabulary == 'SIO' and  $bundle->accession == '000396') {
+  if ($bundle->accession == 'SIO:000396') {
     $info['schema__name']['widget']['type'] = 'text_textfield';
     $info['schema__name']['settings']['text_processing'] = '0';
 
   }
 
   // Fields for the License content type.
-  if ($bundle->vocab->vocabulary == 'schema' and  $bundle->accession == 'license') {
+  if ($bundle->accession == 'schema:license') {
     // We don't want the URL to be a textfield:
     $info['data__uri']['label'] = 'URI';
     $info['data__uri']['widget']['type'] = 'text_textfield';
