@@ -1,48 +1,23 @@
 <?php
 /**
  * @file
+ *
  * Installation of the file module
  */
 
-/**
- * Implements hook_disable().
- *
- * Perform actions when the module is disabled by the site administrator
- *
- * @ingroup tripal_file
- */
-function tripal_file_disable() {
-
-
-
-}
 
 /**
  * Implements hook_requirements().
- *
- * Performs check to see if all required dependencies are met. Drupal will
- * automatically check for module dependencies but here you can check for
- * other requirements.
- *
- * @ingroup tripal_file
  */
 function tripal_file_requirements($phase) {
-
-
-  $requirements = array();
+  $requirements = [];
   if ($phase == 'install') {
-    // EXPLANATION: It is essential that Chado be installed for almost all
-    // Tripal modules. Therefore, the following code checks to ensure Chado
-    // is installed and available.  If your module does not require that
-    // Chado be installed, you can remove the following check.
-
-    // make sure chado is installed
-    if (!$GLOBALS["chado_is_installed"]) {
-      $requirements ['tripal_file'] = array(
-          'title' => "tripal_file",
-          'value' => "ERROR: Chado must be installed before this module can be enabled",
-          'severity' => REQUIREMENT_ERROR,
-      );
+    if (!module_exists('tripal_core') and !module_exists('tripal')) {
+      $requirements['tripal_galaxy'] = [
+        'title' => "tripal_galaxy",
+        'value' => "ERROR: You must have Tripal v2 or v3 installed to use this module.",
+        'severity' => REQUIREMENT_ERROR,
+      ];
     }
   }
   return $requirements;
@@ -56,189 +31,156 @@ function tripal_file_requirements($phase) {
  * @ingroup tripal_file
  */
 function tripal_file_install() {
-
-  // create the module's data directory
-  tripal_create_files_dir('tripal_file');
-
-  // EXPLANATION: Here is a good place to add any materialized views,
-  tripal_file_add_mviews();
-
-  // add any external databases used by the file module.
-  tripal_file_add_dbs();
-
-  // add any controlled vocabularies used by the file module. 
-  tripal_file_add_cvs();
-
-
-  // add any controlled vocabulary terms
-  tripal_file_add_cvterms();
-
-	// use the tripal_set_default_cv() function to specify
-  // the Sequence Ontology (sequence) as the default vocabulary.
-  tripal_set_default_cv('file', 'type_id', 'file_type');
-
-
-  // add any custom tables. For this case we will add an 'file' table to the
-  // chado schema
-  tripal_file_add_custom_tables();
-}
-
-
-/**
- * Implements hook_uninstall().
- *
- * Performs actions when the modules is uninstalled.
- *
- * @ingroup tripal_file
- */
-function tripal_file_uninstall() {
-
-}
-
-/**
- * Implementation of hook_schema().
- *
- * @ingroup tripal_file
- */
-function tripal_file_schema() {
-
-
-};
-
-/**
- * Creates a materialized view that stores the type & number of files per organism
- *
- * @ingroup tripal_file
- */
-function tripal_file_add_mviews() {
-
-
-}
-/**
- * Add cvs related to publications
- *
- * @ingroup tripal_file
- */
-function tripal_file_add_dbs() {
-
-}
-/**
- * Add cvs related to publications
- *
- * @ingroup tripal_file
- */
-function tripal_file_add_cvs() {
-
-  // EXPLANATION: use the tripal_insert_cv() function to add any
-  // controlled vocabularies, cv terms are sort of like the branches of 
-  // cv.  
-  
-  tripal_insert_cv(
-    'file_type',
-    'Contains terms describing types of files.'
-  );
-
-
-}
-
-/**
- * Adds controlled vocabulary terms needed by this module.
- *
- * @ingroup tripal_file
- */
-function tripal_file_add_cvterms() {
-
-  //Insert some terms for the file type cv
-  tripal_insert_cvterm(array(
-		'id'         => 'txt',         // the term accession
-		'name'       => 'TXT',    // the human readable term name
-		'cv_name'    => 'file_type', // the CV name this term belongs to.
-		'definition' => 'Cuz I\'m T.X.T! I\'m dynamite!',
-		//'db_name'    => 'file_db',   // the database in which the term is found.
-	));
-  
-  tripal_insert_cvterm(array(
-    	'id'         => 'fasta',         // the term accession
-    	'name'       => 'FASTA',    // the human readable term name
-    	'cv_name'    => 'file_type', // the CV name this term belongs to.
-    	'definition' => 'Free Agents Symmetrically Testing Algea',
-    //'db_name'    => 'file_db',   // the database in which the term is found.
-  ));
-  tripal_insert_cvterm(array(
-  		'id'         => 'gff3',         // the term accession
-  		'name'       => 'GFF3',    // the human readable term name
-  		'cv_name'    => 'file_type', // the CV name this term belongs to.
-  		'definition' => 'Girl Friend For Three',
-  		//'db_name'    => 'file_db',   // the database in which the term is found.
-  ));
-  tripal_insert_cvterm(array(
-  		'id'         => 'VCF',         // the term accession
-  		'name'       => 'vcf',    // the human readable term name
-  		'cv_name'    => 'file_type', // the CV name this term belongs to.
-  		'definition' => 'Virtual Communist Files',
-  		//'db_name'    => 'file_db',   // the database in which the term is found.
-  ));
-  tripal_insert_cvterm(array(
-  		'id'         => 'bam',         // the term accession
-  		'name'       => 'BAM',    // the human readable term name
-  		'cv_name'    => 'file_type', // the CV name this term belongs to.
-  		'definition' => 'Brotato As Man',
-  		//'db_name'    => 'file_db',   // the database in which the term is found.
-  ));
-}
-
-/**
- * Add custom tables to Chado that are required by this module
- *
- * @ingroup tripal_file
- */
-function tripal_file_add_custom_tables() {
-
-
+  // Add the custom tables needed to associate Chado content with files.
   tripal_file_add_file_table();
   tripal_file_add_license_table();
-  tripal_file_add_file_source_table();
-  tripal_file_add_file_prop_table();
-  tripal_file_add_stock_file_table();
-  tripal_file_add_feature_file_table();
-  tripal_file_add_analysis_file_table();
-  tripal_file_add_organism_file_table();
-  
-  
-  //Do not believe these tables are needed.
-  //tripal_file_add_fileprop_table();
-  //tripal_file_add_file_relationship_table();
-  //tripal_file_add_file_dbxref_table();
+  tripal_file_add_file_contact_table();
+  tripal_file_add_fileloc_table();
+  tripal_file_add_fileprop_table();
+  tripal_file_add_fileloc_table();
+  tripal_file_add_file_license_table();
+
+  // Add the terms and content types.
+  tripal_file_add_terms();
+  tripal_file_add_ctypes();
+}
+
+function tripal_file_add_terms() {
+  // The SIO cv does not need to be added because it is
+  // automatically added by the base Tripal setup.
+
+  //
+  // Content type terms
+  //
+  $term = chado_insert_cvterm([
+    'id' => 'SIO:000396',
+    'name' => 'file',
+    'cv_name' => 'SIO',
+    'definition' => 'A file is an information-bearing object that contains a physical embodiment of some information using a particular character encoding',
+  ]);
+  chado_associate_semweb_term(NULL, 'file_id', $term);
+
+  $term = chado_insert_cvterm([
+    'id' => 'schema:license',
+    'name' => 'license',
+    'cv_name' => 'schema',
+    'definition' => 'A license document that applies to this content, typically indicated by URL.',
+  ]);
+  chado_associate_semweb_term(NULL, 'license_id', $term);
+
+  //
+  // Terms for the File table.
+  //
+  $term = chado_get_cvterm(['id' => 'schema:name']);
+  chado_associate_semweb_term('file', 'name', $term);
+
+  $term = chado_get_cvterm(['id' => 'schema:description']);
+  chado_associate_semweb_term('file', 'description', $term);
+
+  $term = chado_insert_cvterm([
+    'id' => 'format:1915',
+    'name' => 'Format',
+    'cv_name' => 'EDAM',
+    'definition' => 'A defined way or layout of representing and structuring data in a computer file, blob, string, message, or elsewhere.',
+  ]);
+  chado_associate_semweb_term('file', 'type_id', $term);
+
+  //
+  // Terms for the file_contact table
+  //
+  $term = chado_get_cvterm(['id' => 'local:contact']);
+  chado_associate_semweb_term('file_contact', 'contact_id', $term);
+
+  //
+  // Terms for the fileloc table
+  //
+  $term = chado_get_cvterm(['id' => 'data:1047']);
+  chado_associate_semweb_term('fileloc', 'uri', $term);
+
+  $term = chado_get_cvterm(['id' => 'OBCS:0000117']);
+  chado_associate_semweb_term('fileloc', 'rank', $term);
+
+  //
+  // Terms for the fileprop table
+  //
+  $term = chado_get_cvterm(['id' => 'OBCS:0000117']);
+  chado_associate_semweb_term('fileprop', 'rank', $term);
+
+  $term = chado_get_cvterm(['id' => 'NCIT:C25712']);
+  chado_associate_semweb_term('fileprop', 'value', $term);
+
+  $term = chado_get_cvterm(['id' => 'schema:additionalType']);
+  chado_associate_semweb_term('fileprop', 'type_id', $term);
+
+  //
+  // Terms for the license table
+  //
+
+  $term = chado_get_cvterm(['id' => 'schema:name']);
+  chado_associate_semweb_term('license', 'name', $term);
+
+  $term = chado_get_cvterm(['id' => 'data:1047']);
+  chado_associate_semweb_term('license', 'uri', $term);
+
+  $term = chado_insert_cvterm([
+    'id' => 'schema:disambiguatingDescription',
+    'name' => 'disambiguatingDescription',
+    'cv_name' => 'schema',
+    'definition' => 'A sub property of description. A short description of the item used to disambiguate from other, similar items. Information from other properties (in particular, name) may be necessary for the description to be useful for disambiguation.',
+  ]);
+  chado_associate_semweb_term('license', 'summary', $term);
+
+
+  //
+  // Terms for the file_license table
+  //
+  // No terms needed, just linking fields.
+
+
 }
 /**
- * A linker table for organisms and files
- * 
+ * Adds Tripal v3 content types.
  */
-function tripal_file_add_organism_file_table()
-{
-	$schema = array(
-		'table' => 'organism_file',
-		'fields' => array(
-		   'organism_file_id' => array(
-		     'type' => 'serial',
-			 'not null' => TRUE,
-			  ),
-		   'organism_id' => array(
-			  'type' => 'int',
-			  'not null' => TRUE,
-			   ),
-		   'file_id' => array(
-   			  'type' => 'int',
-		   	  'not_null'=> TRUE	
-			    ),
-			),
-			'primary key' => array(
-				0 => 'organism_file_id',
-			),
-	);	//end table array
-			chado_create_custom_table('organism_file', $schema, TRUE);
-}		
+function tripal_file_add_ctypes() {
 
+  // Add the File content type
+  $bundle = tripal_load_bundle_entity(['accession' => 'SIO:000396']);
+  if (!$bundle) {
+    $args = [
+      'vocabulary' => 'SIO',
+      'accession' => '000396',
+      'term_name' => 'file',
+      'label' => "File",
+      'storage_args' => [
+        'data_table' => 'file',
+      ],
+      'category' => 'Other',
+    ];
+    if (!tripal_create_bundle($args, $job)) {
+      $msg = t('Error encountered creating !type Content Type.', ['!type' => $args['term_name']]);
+      throw new Exception($msg);
+    }
+  }
+
+  // Add the License content type
+  $bundle = tripal_load_bundle_entity(['accession' => 'schema:license']);
+  if (!$bundle) {
+    $args = [
+      'vocabulary' => 'schema',
+      'accession' => 'license',
+      'term_name' => 'license',
+      'label' => "License",
+      'storage_args' => [
+        'data_table' => 'license',
+      ],
+      'category' => 'Other',
+    ];
+    if (!tripal_create_bundle($args, $job)) {
+      $msg = t('Error encountered creating !type Content Type.', ['!type' => $args['term_name']]);
+      throw new Exception($msg);
+    }
+  }
+}
 
 /**
  * Adds the 'file' custom table to Chado.
@@ -246,267 +188,269 @@ function tripal_file_add_organism_file_table()
  * @ingroup tripal_file
  */
 function tripal_file_add_file_table() {
-	// EXPLANATION: use the Drupal Schema API to describe the custom table. Then
-	// add the table using the chado_create_custom_table() function.
-	$schema = array(
-			'table' => 'file',
-			'fields' => array(
-				'file_id' => array(
-					'type' => 'serial',
-					'not null' => TRUE
-					),
-				'file_data' => array(
-					'type' => 'text'
-					),
-				'type_id' => array(
-					'type' => 'int',
-					'not null' => TRUE
-					),
-				'name' => array(
-					'type' => 'text'
-					),
-				'description' => array(
-					'type' => 'text',
-					),
-				'relative_url' => array(
-					'type' =>'text',
-					'not null' => TRUE
-					),
-				'db_id' => array(
-					'type' => 'integer',
-					'not null' => TRUE	
-					),
-				'fileloc_id' => array(
-					'type' => 'int',
-					'not null' => TRUE
-					),
-				'timelastmodified' => array(
-					'type' => 'timestamp without time zone',
-					'not null' => TRUE
-					),
-			),
-			'primary key' => array(
-			 	0 => 'file_id',
-			),
-	);
-	
-		chado_create_custom_table('file', $schema, TRUE);
+  $schema = [
+    'table' => 'file',
+    'fields' => [
+      'file_id' => [
+        'type' => 'serial',
+        'not null' => TRUE,
+      ],
+      'name' => [
+        'type' => 'text',
+        'not null' => TRUE,
+      ],
+      'type_id' => [
+        'type' => 'int',
+        'not null' => TRUE
+      ],
+      'description' => [
+        'type' => 'text',
+      ],
+    ],
+    'primary key' => ['file_id'],
+    'unique keys' => [
+      'file_c1' => ['name'],
+    ],
+    'indexes' => [
+      'file_idx1' => ['name'],
+      'file_idx2' => ['type_id'],
+    ],
+    'foreign keys' => [
+      'cvterm' => [
+        'table' => 'cvterm',
+        'columns' => [
+          'type_id' => 'cvterm_id',
+        ],
+      ],
+    ],
+  ];
+
+  chado_create_custom_table('file', $schema, TRUE, NULL, FALSE);
 }
 
+/**
+ *
+ */
+function tripal_file_add_file_contact_table(){
+  $schema = [
+    'table' => 'file_contact',
+    'fields' => [
+      'file_contact_id' => [
+        'type' => 'serial',
+        'not null' => TRUE
+      ],
+      'file_id' => [
+        'type' => 'int',
+        'not null' => TRUE
+      ],
+      'contact_id' => [
+        'type' => 'int'
+      ],
+    ],
+    'primary key' => ['file_contact_id'],
+    'unique keys' => [
+      'file_contact_c1' => ['file_id', 'contact_id'],
+    ],
+    'indexes' => [
+      'file_contact_idx1' => ['file_id'],
+      'file_contact_idx2' => ['contact_id'],
+    ],
+    'foreign keys' => [
+      'file' => [
+        'table' => 'file',
+        'columns' => [
+          'file_id' => 'file_id',
+        ],
+      ],
+      'contact' => [
+        'table' => 'contact',
+        'columns' => [
+          'contact_id' => 'contact_id',
+        ],
+      ],
+    ],
+  ];
+  chado_create_custom_table('file_contact', $schema, TRUE, NULL, FALSE);
+}
+
+/**
+ *
+ */
+function tripal_file_add_fileloc_table(){
+  $schema = [
+    'table' => 'fileloc',
+    'fields' => [
+      'fileloc_id' => [
+        'type' => 'serial',
+        'not null' => TRUE
+      ],
+      'uri' => [
+        'type' => 'text',
+        'not null' => TRUE,
+        'description' => t('Can be one of the following 1) A relative URL which can be concatenated to the http://[domain]. 2) A Drupal scheme (e.g. public://[path]) 3) A full URL to a remote site.')
+      ],
+      'file_id' => [
+        'type' => 'int',
+        'not null' => TRUE,
+      ],
+      'rank' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0
+      ],
+    ],
+    'primary key' => ['fileloc_id'],
+    'unique keys' => [
+      'fileloc_c1' => ['file_id', 'uri'],
+    ],
+    'indexes' => [
+      'fileloc_idx1' => ['file_id'],
+    ],
+    'foreign keys' => [
+      'file' => [
+        'table' => 'file',
+        'columns' => [
+          'file_id' => 'file_id',
+        ],
+      ],
+    ],
+  ];
+  chado_create_custom_table('fileloc', $schema, TRUE, NULL, FALSE);
+}
+/**
+ *
+ */
+function tripal_file_add_fileprop_table(){
+  $schema = [
+    'table' => 'fileprop',
+    'fields' => [
+      'fileprop_id' => [
+        'type' => 'serial',
+        'not null' => TRUE
+      ],
+      'file_id' => [
+        'type' => 'int',
+        'not null' => TRUE
+      ],
+      'type_id' => [
+        'type' => 'int',
+        'not null' => TRUE
+      ],
+      'value' => [
+        'type' => 'text'
+      ],
+      'rank' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0
+      ],
+    ],
+    'primary key' => ['fileprop_id'],
+    'unique keys' => [
+      'fileprop_c1' => ['file_id', 'type_id', 'rank'],
+    ],
+    'indexes' => [
+      'fileprop_idx1' => ['file_id'],
+      'fileprop_idx2' => ['type_id'],
+    ],
+    'foreign keys' => [
+      'file' => [
+        'table' => 'file',
+        'columns' => [
+          'file_id' => 'file_id',
+        ],
+      ],
+      'cvterm' => [
+        'table' => 'cvterm',
+        'columns' => [
+          'type_id' => 'cvterm_id',
+        ],
+      ],
+    ],
+  ];
+  chado_create_custom_table('fileprop', $schema, TRUE, NULL, FALSE);
+}
+
+
+
+/**
+ *
+ */
 function tripal_file_add_license_table(){
-	$schema = array(
-			'table' => 'license',
-			'fields' => array(
-				'license_id' => array(
-					'type' => 'integer',
-					'not null' => TRUE
-					),
-				'name' => array(
-					'type' => 'varchar',
-					'length' => 1024
-					),
-				'url' => array(
-					'type' => 'text'
-					),
-				'license_text' => array(
-					'type' => 'text'
-					),
-				'summary' => array(
-					'type' => 'text'
-					),
-			),
-			'primary key' => array(
-				0 => 'license_id'
-			),
-	);
-	
-		chado_create_custom_table('license', $schema, TRUE);
+  $schema = [
+    'table' => 'license',
+    'fields' => [
+      'license_id' => [
+        'type' => 'serial',
+        'not null' => TRUE
+      ],
+      'name' => [
+        'type' => 'varchar',
+        'length' => 1024,
+        'not null' => TRUE
+      ],
+      'summary' => [
+        'type' => 'text',
+      ],
+      'uri' => [
+        'type' => 'text',
+      ],
+    ],
+    'primary key' => ['license_id'],
+    'unique keys' => [
+      'license_c1' => ['name'],
+      'license_c2' => ['uri'],
+    ],
+    'indexes' => [
+      'license_idx1' => ['name'],
+    ],
+  ];
+  chado_create_custom_table('license', $schema, TRUE, NULL, FALSE);
 }
 
-function tripal_file_add_file_source_table(){
-	$schema = array(
-			'table' => 'file_source',
-			'fields' => array(
-				'file_source_id' => array(
-					'type' => 'serial',
-					'not null' => TRUE
-					),
-				'file_id' => array(
-					'type' => 'int',
-					'not null' => TRUE
-					),
-				'contact_id' => array(
-					'type' => 'int'
-					),
-				'license' => array(
-					'type' => 'text'
-					),
-				'rank' => array(
-					'type' => 'int',
-					'not null' => TRUE,
-					'default' => 0
-					),
-			),
-			'primary key' => array(
-				0 => 'file_source_id'
-			),
-	);
-	
-		chado_create_custom_table('file_source', $schema, TRUE);
-}
-
-function tripal_file_add_file_prop_table(){
-	$schema = array(
-			'table' => 'fileprop',
-			'fields' => array(
-				'file_prop_id' => array(
-					'type' => 'serial',
-					'not null' => TRUE
-					),
-				'file_id' => array (
-					'type' => 'int',
-					'not null' => TRUE
-					),
-				'type_id' => array(
-					'type' => 'int',
-					'not null' => TRUE
-					),
-				'value' => array(
-					'type' => 'text'
-					),
-			),
-			'primary key' => array(
-				0 => 'file_prop_id'
-			),
-	);
-		chado_create_custom_table('fileprop', $schema, TRUE);
-}
-
-function tripal_file_add_stock_file_table(){
-	$schema = array(
-			'table' => 'stock_file',
-			'fields' => array(
-				'stock_file_id' => array(
-					'type' => 'serial',
-					'not null' => TRUE
-					),
-				'file_id' => array(
-					'type' => 'int',
-					'not null' => TRUE
-					),
-				'stock_id' => array(
-					'type' => 'int',
-					'not null' => TRUE
-					),
-			),
-			'primary key' => array(
-				0 => 'stock_file_id'
-			),
-	);
-	
-		chado_create_custom_table('stock_file', $schema, TRUE);
-}
-
-function tripal_file_add_feature_file_table(){
-	$schema = array(
-			'table' => 'feature_file',
-			'fields' => array(
-				'feature_file_id' => array(
-					'type' => 'serial',
-					'not null' => TRUE
-					),
-				'file_id' => array(
-					'type' => 'int',
-					'not null' => TRUE
-					),
-				'feature_id' => array(
-					'type' => 'int',
-					'not null' => TRUE
-					),
-			),
-			'primary key' => array(
-				0 => 'feauture_file_id'
-			),
-	);
-	
-		chado_create_custom_table('feature_file', $schema, TRUE);
-}
-
-function tripal_file_add_analysis_file_table(){
-	
-	$schema = array(
-			'table' => 'analysis_file',
-			'fields' => array(
-				'analysis_file_id' => array(
-					'type' => 'serial',
-					'not null' => TRUE
-					),
-				'file_id' => array(
-					'type' => 'int',
-					'not null' => TRUE
-					),
-				'analysis_id' => array(
-					'type' => 'int',
-					'not null' => TRUE
-					),
-			),
-			'primary key' => array(
-				0 => 'analysis_file_id'
-			),
-	);
-	
-		chado_create_custom_table('analysis_file', $schema, TRUE);
-}
-
-function tripal_file_add_organism_file_table(){
-	$schema = array(
-			'table' => 'organism_file',
-			'fields' => array(
-		   		'organism_file_id' => array(
-		     		'type' => 'serial',
-			 		'not null' => TRUE
-			  		),
-		   		'organism_id' => array(
-			  		'type' => 'int',
-			  		'not null' => TRUE
-			   		),
-		   		'file_id' => array(
-   			  		'type' => 'int',
-		   	  		'not_null'=> TRUE
-			    	),
-			),
-			'primary key' => array(
-			 	0 => 'organism_file_id'
-			),
-	);
-	
-		chado_create_custom_table('organism_file', $schema, TRUE);
-}		
 
 /**
- * This is the required update for tripal_file.
+ *
  */
-function tripal_file_update_7200() {
-
-  try {
-   // perform database changes
-  }
-  catch (\PDOException $e) {
-    $error = $e->getMessage();
-    throw new DrupalUpdateException('Could not apply updates: '. $error);
-  }
-}
-
-/**
- * Implementation of hook_update_dependencies().  It specifies a list of
- * other modules whose updates must be run prior to this one.
- */
-function tripal_file_update_dependencies() {
-  $dependencies = array();
-
-  $dependencies['tripal_file'][7200] = array(
-    'tripal_cv' => 7200
-  );
-
-  return $dependencies;
+function tripal_file_add_file_license_table() {
+  $schema = [
+    'table' => 'file_license',
+    'fields' => [
+      'file_license_id' => [
+        'type' => 'serial',
+        'not null' => TRUE
+      ],
+      'file_id' => [
+        'type' => 'int',
+        'not null' => TRUE
+      ],
+      'license_id' => [
+        'type' => 'int',
+        'not null' => TRUE
+      ],
+    ],
+    'primary key' => ['file_license_id'],
+    'unique keys' => [
+      'file_license_c1' => ['file_id', 'license_id'],
+    ],
+    'indexes' => [
+      'file_license_idx1' => ['file_id'],
+      'file_license_idx2' => ['license_id'],
+    ],
+    'foreign keys' => [
+      'file' => [
+        'table' => 'file',
+        'columns' => [
+          'file_id' => 'file_id',
+        ],
+      ],
+      'license' => [
+        'table' => 'license',
+        'columns' => [
+          'license_id' => 'license_id',
+        ],
+      ],
+    ],
+  ];
+  chado_create_custom_table('file_license', $schema, TRUE, NULL, FALSE);
 }
