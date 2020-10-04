@@ -30,6 +30,83 @@ function tripal_file_views_api() {
 }
 
 /**
+ * Implements hook_bundle_fields_info().
+ *
+ * This is a Tripal defined hook that supports integration with the
+ * TripalEntity field.
+ */
+function tripal_file_bundle_fields_info($entity_type, $bundle) {
+  $info = [];
+  $chado_bundle = db_select('chado_bundle', 'cb')
+    ->fields('cb')
+    ->condition('bundle_id', $bundle->id)
+    ->execute()
+    ->fetchObject();
+
+  if ($chado_bundle->data_table == 'file') {
+    $info['schema__itemlocation'] = [
+      'field_name' => 'schema__itemlocation',
+      'type' => 'schema__itemlocation',
+      'cardinality' => FIELD_CARDINALITY_UNLIMITED,
+      'locked' => FALSE,
+      'storage' => [
+        'type' => 'field_chado_storage',
+      ],
+    ];
+  }
+  return $info;
+}
+
+/**
+ * Impelments hook_create_tripalfield_instance().
+ *
+ * This is a Tripal defined hook that supports integration with the
+ * TripalEntity field.
+ */
+function tripal_file_bundle_instances_info($entity_type, $bundle) {
+  $info = [];
+  $chado_bundle = db_select('chado_bundle', 'cb')
+    ->fields('cb')
+    ->condition('bundle_id', $bundle->id)
+    ->execute()
+    ->fetchObject();
+
+  if ($chado_bundle->data_table == 'file') {
+    $info[schema__itemlocation] = [
+      'field_name' => 'schema__itemlocation',
+      'entity_type' => 'TripalEntity',
+      'bundle' => $bundle->name,
+      'label' => 'Location',
+      'description' => 'The location of the file.',
+      'required' => TRUE,
+      'settings' => [
+        'auto_attach' => TRUE,
+        'chado_table' => 'fileloc',
+        'chado_column' => 'file_id',
+        'base_table' => 'file',
+        'term_accession' => 'itemLocation',
+        'term_vocabulary' => 'schema',
+        'term_name' => 'itemLocation',
+      ],
+      'widget' => [
+        'type' => 'schema__itemlocation_widget',
+        'settings' => [
+          'display_label' => 1,
+        ],
+      ],
+      'display' => [
+        'default' => [
+          'label' => 'inline',
+          'type' => 'schema__itemlocation_formatter',
+          'settings' => [],
+        ],
+      ],
+    ];
+  }
+  return $info;
+}
+
+/**
  * Implements hook_bundle_fields_info_alter().
  */
 function tripal_file_bundle_fields_info_alter(&$info, $bundle, $term) {

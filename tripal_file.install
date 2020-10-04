@@ -100,6 +100,9 @@ function tripal_file_add_terms() {
   $term = chado_get_cvterm(['id' => 'OBCS:0000117']);
   chado_associate_semweb_term('fileloc', 'rank', $term);
 
+  $term = chado_get_cvterm(['id' => 'data:2190']);
+  chado_associate_semweb_term('fileloc', 'md5checksum', $term);
+
   //
   // Terms for the fileprop table
   //
@@ -136,6 +139,16 @@ function tripal_file_add_terms() {
   //
   // No terms needed, just linking fields.
 
+
+  //
+  // Field types
+  //
+  $term = chado_insert_cvterm([
+    'id' => 'schema:itemLocation',
+    'name' => 'itemLocation',
+    'cv_name' => 'schema',
+    'definition' => 'Current location of the item.',
+  ]);
 
 }
 /**
@@ -284,19 +297,24 @@ function tripal_file_add_fileloc_table(){
         'type' => 'serial',
         'not null' => TRUE
       ],
+      'file_id' => [
+        'type' => 'int',
+        'not null' => TRUE,
+      ],
       'uri' => [
         'type' => 'text',
         'not null' => TRUE,
         'description' => t('Can be one of the following 1) A relative URL which can be concatenated to the http://[domain]. 2) A Drupal scheme (e.g. public://[path]) 3) A full URL to a remote site.')
       ],
-      'file_id' => [
-        'type' => 'int',
-        'not null' => TRUE,
-      ],
       'rank' => [
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0
+      ],
+      'md5checksum' => [
+        'size' => 'normal',
+        'type' => 'char',
+        'length' => '32',
       ],
     ],
     'primary key' => ['fileloc_id'],
