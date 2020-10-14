@@ -21,6 +21,7 @@ class schema__itemlocation_widget extends ChadoFieldWidget {
     $md5 = '';
     $remote = '';
     $local = '';
+    $rank = $delta;
 
     $uri_term = chado_get_semweb_term('fileloc', 'uri');
     $rank_term = chado_get_semweb_term('fileloc', 'rank');
@@ -31,6 +32,7 @@ class schema__itemlocation_widget extends ChadoFieldWidget {
     if (count($items) > 0 and array_key_exists($delta, $items)) {
       $file_id = tripal_get_field_item_keyval($items, $delta, 'chado-fileloc__file_id', $file_id);
       $uri = tripal_get_field_item_keyval($items, $delta, 'chado-fileloc__uri', $uri);
+      $rank = tripal_get_field_item_keyval($items, $delta, 'chado-fileloc__rank', $rank);
       $record_id = tripal_get_field_item_keyval($items, $delta, 'chado-fileloc__fileloc_id', $record_id);
       $md5 = tripal_get_field_item_keyval($items, $delta, 'chado-fileloc__md5checksum', $md5);
     }
@@ -53,7 +55,7 @@ class schema__itemlocation_widget extends ChadoFieldWidget {
     ];
     $widget['chado-fileloc__rank'] = [
       '#type' => 'value',
-      '#default_value' => $delta,
+      '#default_value' => $rank,
     ];
     $widget['chado-fileloc__md5checksum'] = [
       '#type' => 'value',
@@ -108,21 +110,36 @@ class schema__itemlocation_widget extends ChadoFieldWidget {
   public function validate($element, $form, &$form_state, $langcode, $delta) {
     $field_name = $this->field['field_name'];
 
-    $remote = $form_state['values'][$field_name]['und'][0]['remote'];
-    $local = $form_state['values'][$field_name]['und'][0]['local'];
-
+    // Perform validation of form elements.
+    $remote = $form_state['values'][$field_name]['und'][$delta]['remote'];
+    $local = $form_state['values'][$field_name]['und'][$delta]['local'];
     if ($remote and $local) {
-      form_set_error($field_name . '][und][0][remote', "For the file location, please provide only URL or Tripal managed file but not both.");
+      form_set_error($field_name . '][und]['. $delta . '][remote', "For the file location, please provide only a URL or Tripal managed file but not both.");
     }
-    if (!$remote and !$local) {
-      form_set_error($field_name . '][und][0][remote', "Please specify a location as a URL or a Tripal managed file.");
+    if (!$remote and !$local and $delta == 0) {
+      form_set_error($field_name . '][und]['. $delta . '][remote', "Please specify a location as a URL or a Tripal managed file.");
     }
+
+    // If the user re-ordered the items then set the rank to match.
+    $rank = $form_state['values'][$field_name]['und'][$delta]['_weight'];
+    $form_state['values'][$field_name]['und'][$delta]['chado-fileloc__rank'] = $rank;
+
+
+    // Set the File URI value according to the user's selection.
     if ($remote) {
-      $form_state['values'][$field_name]['und'][0]['chado-fileloc__uri'] = $remote;
+      $form_state['values'][$field_name]['und'][$delta]['chado-fileloc__uri'] = $remote;
     }
-    if ($local) {
+    elseif ($local) {
       $file = file_load($local);
-      $form_state['values'][$field_name]['und'][0]['chado-fileloc__uri'] = $file->uri;
+      $form_state['values'][$field_name]['und'][$delta]['chado-fileloc__uri'] = $file->uri;
+    }
+    // If no file is selected then clear out all values but the Pkey so the
+    // location record can be removed.
+    else {
+      $form_state['values'][$field_name]['und'][$delta]['chado-fileloc__file_id'] = '';
+      $form_state['values'][$field_name]['und'][$delta]['chado-fileloc__uri'] = '';
+      $form_state['values'][$field_name]['und'][$delta]['chado-fileloc__rank'] = '';
+      $form_state['values'][$field_name]['und'][$delta]['chado-fileloc__md5checksum'] = '';
     }
   }
 }

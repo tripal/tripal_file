@@ -53,6 +53,16 @@ function tripal_file_bundle_fields_info($entity_type, $bundle) {
         'type' => 'field_chado_storage',
       ],
     ];
+
+    $info['schema__license'] = [
+      'field_name' => 'schema__license',
+      'type' => 'schema__license',
+      'cardinality' => 1,
+      'locked' => FALSE,
+      'storage' => [
+        'type' => 'field_chado_storage',
+      ],
+    ];
   }
   return $info;
 }
@@ -72,7 +82,7 @@ function tripal_file_bundle_instances_info($entity_type, $bundle) {
     ->fetchObject();
 
   if ($chado_bundle->data_table == 'file') {
-    $info[schema__itemlocation] = [
+    $info['schema__itemlocation'] = [
       'field_name' => 'schema__itemlocation',
       'entity_type' => 'TripalEntity',
       'bundle' => $bundle->name,
@@ -98,6 +108,37 @@ function tripal_file_bundle_instances_info($entity_type, $bundle) {
         'default' => [
           'label' => 'inline',
           'type' => 'schema__itemlocation_formatter',
+          'settings' => [],
+        ],
+      ],
+    ];
+
+    $info['schema__license'] = [
+      'field_name' => 'schema__license',
+      'entity_type' => 'TripalEntity',
+      'bundle' => $bundle->name,
+      'label' => 'License',
+      'description' => 'The license for the file.',
+      'required' => TRUE,
+      'settings' => [
+        'auto_attach' => TRUE,
+        'chado_table' => 'file_license',
+        'chado_column' => 'file_license_id',
+        'base_table' => 'file',
+        'term_accession' => 'license',
+        'term_vocabulary' => 'schema',
+        'term_name' => 'license',
+      ],
+      'widget' => [
+        'type' => 'schema__license_widget',
+        'settings' => [
+          'display_label' => 1,
+        ],
+      ],
+      'display' => [
+        'default' => [
+          'label' => 'inline',
+          'type' => 'schema__license_formatter',
           'settings' => [],
         ],
       ],
@@ -132,4 +173,30 @@ function tripal_file_bundle_instances_info_alter(&$info, $bundle, $term) {
     $info['data__uri']['widget']['type'] = 'text_textfield';
     $info['data__uri']['settings']['text_processing'] = '0';
   }
+}
+
+
+/**
+ * Implements hook_tripal_default_title_format().
+ *
+ * Overrides the default titles.
+ */
+function tripal_file_tripal_default_title_format($bundle, $available_tokens) {
+  $format = [];
+
+  $table = $bundle->data_table;
+
+  if ($table == 'file') {
+    $format[] = [
+      'format' => '[schema__name]',
+      'weight' => -5,
+    ];
+  }
+  if ($table == 'license') {
+    $format[] = [
+      'format' => '[schema__name]',
+      'weight' => -5,
+    ];
+  }
+  return $format;
 }

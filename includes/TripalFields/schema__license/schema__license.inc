@@ -1,6 +1,6 @@
 <?php
 
-class schema__itemlocation extends ChadoField {
+class schema__license extends ChadoField {
 
 
   // --------------------------------------------------------------------------
@@ -12,10 +12,10 @@ class schema__itemlocation extends ChadoField {
   // --------------------------------------------------------------------------
 
   // The default label for this field.
-  public static $default_label = 'Location';
+  public static $default_label = 'License';
 
   // The default description for this field.
-  public static $description = 'The location of the file.';
+  public static $description = 'A license describing access and usage permissions.';
 
   // Provide a list of instance specific settings. These can be accessed within
   // the instanceSettingsForm.  When the instanceSettingsForm is submitted
@@ -28,9 +28,9 @@ class schema__itemlocation extends ChadoField {
     // The short name for the vocabulary (e.g. schema, SO, GO, PATO, etc.).
     'term_vocabulary' => 'schema',
     // The name of the term.
-    'term_name' => 'itemLocation',
+    'term_name' => 'license',
     // The unique ID (i.e. accession) of the term.
-    'term_accession' => 'itemLocation',
+    'term_accession' => 'license',
     // Set to TRUE if the site admin is allowed to change the term
     // type. This will create form elements when editing the field instance
     // to allow the site admin to change the term settings above.
@@ -38,10 +38,10 @@ class schema__itemlocation extends ChadoField {
   ];
 
   // The default widget for this field.
-  public static $default_widget = 'chado_schema__itemlocation_widget';
+  public static $default_widget = 'chado_schema__license_widget';
 
   // The default formatter for this field.
-  public static $default_formatter = 'chado_schema__itemlocation_formatter';
+  public static $default_formatter = 'chado_schema__license_formatter';
 
   // --------------------------------------------------------------------------
   //              PROTECTED CLASS MEMBERS -- DO NOT OVERRIDE
@@ -62,9 +62,9 @@ class schema__itemlocation extends ChadoField {
   public function elementInfo() {
 
     $field_term = $this->getFieldTermID();
-    $uri_term = chado_get_semweb_term('fileloc', 'uri');
-    $rank_term = chado_get_semweb_term('fileloc', 'rank');
-    $md5_term = chado_get_semweb_term('fileloc', 'md5checksum');
+    $name_term = chado_get_semweb_term('license', 'name');
+    $summary_term = chado_get_semweb_term('license', 'summary');
+    $uri_term = chado_get_semweb_term('license', 'uri');
 
     return [
       $field_term => [
@@ -77,27 +77,27 @@ class schema__itemlocation extends ChadoField {
           $uri_term => [
             'searchable' => FALSE,
             'label' => 'URI',
-            'help' => 'The Universal Resource Identifier for the file',
+            'help' => 'The Universal Resource Identifier for the license.',
             'operations' => [],
             'sortable' => FALSE,
             'type' => 'xs:string',
             'readonly' => FALSE,
             'required' => TRUE,
           ],
-          $rank_term => [
-            'searchable' => FALSE,
-            'label' => 'Rank',
-            'help' => 'The order that this location should appear in the list when multiple locations are available.',
+          $name_term => [
+            'searchable' => TRUE,
+            'label' => 'Name',
+            'help' => 'The name of the license.',
             'operations' => [],
-            'sortable' => FALSE,
+            'sortable' => TRUE,
             'type' => 'xs:integer',
             'readonly' => FALSE,
             'required' => TRUE,
           ],
-          $md5_term => [
+          $summary_term => [
             'searchable' => FALSE,
-            'label' => 'MD5 Checksum',
-            'help' => 'The MD5 checksum of the file.',
+            'label' => 'Summary',
+            'help' => 'A brief summary describing the user priviledges under the license.',
             'operations' => [],
             'sortable' => FALSE,
             'type' => 'xs:string',
@@ -125,40 +125,33 @@ class schema__itemlocation extends ChadoField {
     $field_column = $this->instance['settings']['chado_column'];
     $base_table = $this->instance['settings']['base_table'];
 
-    $uri_term = chado_get_semweb_term('fileloc', 'uri');
-    $rank_term = chado_get_semweb_term('fileloc', 'rank');
-    $md5_term = chado_get_semweb_term('fileloc', 'md5checksum');
+    $name_term = chado_get_semweb_term('license', 'name');
+    $summary_term = chado_get_semweb_term('license', 'summary');
+    $uri_term = chado_get_semweb_term('license', 'uri');
 
     // Set some defaults for the empty record.
     $entity->{$field_name}['und'][0] = [
       'value' => [],
-      'chado-fileloc__fileloc_id' => '',
-      'chado-fileloc__file_id' => '',
-      'chado-fileloc__uri' => '',
-      'chado-fileloc__rank' => '',
-      'chado-fileloc__md5checksum' => '',
+      'chado-file_license__file_license_id' => '',
+      'chado-file_license__file_id' => '',
+      'chado-file_license__license_id' => '',
     ];
 
     if ($record) {
-      $options = [
-        'return_array' => 1,
-        'order_by' => ['rank' => 'ASC'],
-      ];
-      $record = chado_expand_var($record, 'table', 'fileloc', $options);
-      $fileloc_linkers = $record->fileloc;
-      if ($fileloc_linkers) {
-        foreach ($fileloc_linkers as $i => $fileloc) {
+      $options = ['return_array' => 1];
+      $record = chado_expand_var($record, 'table', 'file_license', $options);
+      $file_licenses = $record->file_license;
+      if ($file_licenses) {
+        foreach ($file_licenses as $i => $license) {
           $entity->{$field_name}['und'][$i] = [
             'value' => [
-              $uri_term => file_create_url($fileloc->uri),
-              $rank_term => $fileloc->rank,
-              $md5_term => $fileloc->md5checksum,
+              $name_term => $license->license_id->name,
+              $summary_term => $license->license_id->summary,
+              $uri_term => l($license->license_id->uri, $license->license_id->uri),
             ],
-            'chado-fileloc__fileloc_id' => $fileloc->fileloc_id,
-            'chado-fileloc__file_id' => $fileloc->file_id->file_id,
-            'chado-fileloc__uri' => $fileloc->uri,
-            'chado-fileloc__rank' => $fileloc->rank,
-            'chado-fileloc__md5checksum' => $fileloc->md5checksum,
+            'chado-file_license__file_license_id' => $fileloc->file_license_id,
+            'chado-file_license__file_id' => $license->file_id->file_id,
+            'chado-file_license__license_id' => $license->license_id->license_id,
           ];
         }
       }

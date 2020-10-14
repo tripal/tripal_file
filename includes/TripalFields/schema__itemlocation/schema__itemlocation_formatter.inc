@@ -28,10 +28,9 @@ class schema__itemlocation_formatter extends ChadoFieldFormatter {
     $rank_term = chado_get_semweb_term('fileloc', 'rank');
     $md5_term = chado_get_semweb_term('fileloc', 'md5checksum');
 
-    $headers = ['Available Location'];
     $rows = [];
 
-     foreach ($items as $delta => $item) {
+     foreach ($items as $item) {
        $fileloc = $item['value'];
        if (!$fileloc) {
          continue;
@@ -41,6 +40,7 @@ class schema__itemlocation_formatter extends ChadoFieldFormatter {
      }
 
     $content = '';
+    $headers = ['Available at'];
     if (count($items) > 0) {
       $table = [
         'header' => $headers,
