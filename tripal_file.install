@@ -39,12 +39,30 @@ function tripal_file_install() {
   tripal_file_add_fileprop_table();
   tripal_file_add_fileloc_table();
   tripal_file_add_file_license_table();
+  tripal_file_add_linker_tables();
 
   // Add the terms and content types.
   tripal_file_add_terms();
   tripal_file_add_ctypes();
+
+  tripal_file_add_EDAM_obo();
+
+  // Associate terms with the linker tables.
+  tripal_file_add_linker_tables_terms();
 }
 
+/**
+ *
+ */
+function tripal_file_add_EDAM_obo() {
+  // Add the EDAM ontology
+  $obo_id = tripal_insert_obo('EDAM', 'http://edamontology.org/EDAM.obo');
+  drupal_set_message('NOTICE: Added the EDAM ontology. Please navigate to Tripal >> Data Loaders >> Chado Vocabularies >> OBO Vocabulary Loader and submit a job to import the EDAM vocabulary.');
+}
+
+/**
+ *
+ */
 function tripal_file_add_terms() {
   // The SIO cv does not need to be added because it is
   // automatically added by the base Tripal setup.
@@ -471,4 +489,96 @@ function tripal_file_add_file_license_table() {
     ],
   ];
   chado_create_custom_table('file_license', $schema, TRUE, NULL, FALSE);
+}
+
+/**
+ * A simple function that lists supported base tables.
+ *
+ * We want to be specific about what these supported tables
+ * are because we don't want to accidentaly support any custom table
+ * that might have a _file suffix.
+ */
+function tripal_file_get_linked_tables() {
+  return [
+    'analysis', 'assay', 'biomaterial', 'cv', 'eimage',
+    'feature', 'featuremap', 'library', 'nd_protocol', 'organism',
+    'phylotree', 'project', 'pub', 'stock', 'stockcollection', 'study'
+  ];
+}
+
+
+/**
+ * Creates the set of supported linker tables.
+ */
+function tripal_file_add_linker_tables() {
+
+  $linked_tables = tripal_file_get_linked_tables();
+  foreach ($linked_tables as $linked_table) {
+    $linked_schema = chado_get_schema($linked_table);
+    $pkey = $linked_schema['primary key'][0];
+    $linker_table = $linked_table . '_file';
+    $schema = [
+      'table' => $linker_table,
+      'fields' => [
+        $linker_table . '_id' => [
+          'type' => 'serial',
+          'not null' => TRUE
+        ],
+        'file_id' => [
+          'type' => 'int',
+          'not null' => TRUE
+        ],
+        $pkey => [
+          'type' => 'int',
+          'not null' => TRUE
+        ],
+        'rank' => [
+          'type' => 'int',
+          'not null' => TRUE,
+          'default' => 0
+        ],
+      ],
+      'primary key' => [$linker_table . '_id'],
+      'unique keys' => [
+        $linker_table . '_c1' => ['file_id', $pkey],
+      ],
+      'indexes' => [
+        $linker_table . '_idx1' => ['file_id'],
+        $linker_table . '_idx2' => [$pkey],
+      ],
+      'foreign keys' => [
+        'file' => [
+          'table' => 'file',
+          'columns' => [
+            'file_id' => 'file_id',
+          ],
+        ],
+        $linked_table => [
+          'table' => $linked_table,
+          'columns' => [
+            $pkey => $pkey,
+          ],
+        ],
+      ],
+    ];
+    chado_create_custom_table($linker_table, $schema, TRUE, NULL, FALSE);
+  }
+}
+
+/**
+ * Adds the terms for the linked table columns.
+ */
+function tripal_file_add_linker_tables_terms() {
+  // Terms for linker tables
+  $linked_tables = tripal_file_get_linked_tables();
+
+  foreach ($linked_tables as $linked_table) {
+    $linked_schema = chado_get_schema($linked_table);
+    $pkey = $linked_schema['primary key'][0];
+    $linker_table = $linked_table . '_file';
+
+    // Add the term for rank.
+    $term = chado_get_cvterm(['id' => 'OBCS:0000117']);
+    chado_associate_semweb_term($linker_table, 'rank', $term);
+  }
 }

@@ -147,12 +147,16 @@ class schema__license extends ChadoField {
             'value' => [
               $name_term => $license->license_id->name,
               $summary_term => $license->license_id->summary,
-              $uri_term => l($license->license_id->uri, $license->license_id->uri),
+              $uri_term => $license->license_id->uri,
             ],
-            'chado-file_license__file_license_id' => $fileloc->file_license_id,
+            'chado-file_license__file_license_id' => $license->file_license_id,
             'chado-file_license__file_id' => $license->file_id->file_id,
             'chado-file_license__license_id' => $license->license_id->license_id,
           ];
+          // Is there a published entity for this license?
+          if (property_exists($license->license_id, 'entity_id')) {
+            $entity->{$field_name}['und'][0]['value']['entity'] = 'TripalEntity:' . $license->license_id->entity_id;
+          }
         }
       }
     }

@@ -27,11 +27,12 @@ class schema__license_formatter extends ChadoFieldFormatter {
     $summary_term = chado_get_semweb_term('license', 'summary');
     $uri_term = chado_get_semweb_term('license', 'uri');
 
+    [$content_type, $entity_id] = array_key_exists('entity', $items[0]['value']) ? explode(':', $items[0]['value']['entity']) : [NULL, NULL];
     $element[] = [
       [
         '#type' => 'item',
         '#title' => 'License Name',
-        '#markup' => $items[0]['value'][$name_term],
+        '#markup' => $entity_id ? l($items[0]['value'][$name_term], 'bio_data/' . $entity_id) : $items[0]['value'][$name_term],
       ],
       [
         '#type' => 'item',
@@ -41,7 +42,7 @@ class schema__license_formatter extends ChadoFieldFormatter {
       [
         '#type' => 'item',
         '#title' => 'Full Details',
-        '#markup' => $items[0]['value'][$uri_term],
+        '#markup' => $items[0]['value'][$uri_term] ? l($items[0]['value'][$uri_term], $items[0]['value'][$uri_term]) : '<i>Not Available</i>',
       ],
     ];
   }

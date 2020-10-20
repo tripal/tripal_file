@@ -1,6 +1,6 @@
 <?php
 
-class schema__itemlocation extends ChadoField {
+class sio__file extends ChadoField {
 
 
   // --------------------------------------------------------------------------
@@ -12,10 +12,10 @@ class schema__itemlocation extends ChadoField {
   // --------------------------------------------------------------------------
 
   // The default label for this field.
-  public static $default_label = 'File Location';
+  public static $default_label = 'File';
 
   // The default description for this field.
-  public static $description = 'The location of the file.';
+  public static $description = 'A file.';
 
   // Provide a list of instance specific settings. These can be accessed within
   // the instanceSettingsForm.  When the instanceSettingsForm is submitted
@@ -26,11 +26,11 @@ class schema__itemlocation extends ChadoField {
   // required for all TripalFields.
   public static $default_instance_settings = [
     // The short name for the vocabulary (e.g. schema, SO, GO, PATO, etc.).
-    'term_vocabulary' => 'schema',
+    'term_vocabulary' => 'SIO',
     // The name of the term.
-    'term_name' => 'itemLocation',
+    'term_name' => 'file',
     // The unique ID (i.e. accession) of the term.
-    'term_accession' => 'itemLocation',
+    'term_accession' => '000396',
     // Set to TRUE if the site admin is allowed to change the term
     // type. This will create form elements when editing the field instance
     // to allow the site admin to change the term settings above.
@@ -38,10 +38,10 @@ class schema__itemlocation extends ChadoField {
   ];
 
   // The default widget for this field.
-  public static $default_widget = 'chado_schema__itemlocation_widget';
+  public static $default_widget = 'sio__file_widget';
 
   // The default formatter for this field.
-  public static $default_formatter = 'chado_schema__itemlocation_formatter';
+  public static $default_formatter = 'sio__file_formatter';
 
   // --------------------------------------------------------------------------
   //              PROTECTED CLASS MEMBERS -- DO NOT OVERRIDE
@@ -62,9 +62,12 @@ class schema__itemlocation extends ChadoField {
   public function elementInfo() {
 
     $field_term = $this->getFieldTermID();
-    $uri_term = chado_get_semweb_term('fileloc', 'uri');
-    $rank_term = chado_get_semweb_term('fileloc', 'rank');
-    $md5_term = chado_get_semweb_term('fileloc', 'md5checksum');
+
+    // All of the file linker tables have the same fields so we'll
+    // use the feature_file table to get the cvterms.
+    $name_term = chado_get_semweb_term('feature_file', 'name');
+    $type_term = chado_get_semweb_term('feature_file', 'type_id');
+    $rank_term = chado_get_semweb_term('feature_file', 'rank');
 
     return [
       $field_term => [
@@ -74,33 +77,33 @@ class schema__itemlocation extends ChadoField {
         'type' => 'xs:complexType',
         'readonly' => FALSE,
         'elements' => [
-          $uri_term => [
+          $name_term => [
+            'searchable' => TRUE,
+            'label' => 'Name',
+            'help' => 'The name of the file.',
+            'operations' => [],
+            'sortable' => TRUE,
+            'type' => 'xs:integer',
+            'readonly' => TRUE,
+            'required' => FALSE,
+          ],
+          $type_term => [
             'searchable' => FALSE,
-            'label' => 'URI',
-            'help' => 'The Universal Resource Identifier for the file',
+            'label' => 'Type',
+            'help' => 'The type of file.',
             'operations' => [],
             'sortable' => FALSE,
             'type' => 'xs:string',
-            'readonly' => FALSE,
-            'required' => TRUE,
+            'readonly' => TRUE,
+            'required' => FALSE,
           ],
           $rank_term => [
             'searchable' => FALSE,
             'label' => 'Rank',
-            'help' => 'The order that this location should appear in the list when multiple locations are available.',
+            'help' => 'The order that this file should appear in the list when multiple files are available.',
             'operations' => [],
-            'sortable' => FALSE,
+            'sortable' => TRUE,
             'type' => 'xs:integer',
-            'readonly' => FALSE,
-            'required' => TRUE,
-          ],
-          $md5_term => [
-            'searchable' => FALSE,
-            'label' => 'MD5 Checksum',
-            'help' => 'The MD5 checksum of the file.',
-            'operations' => [],
-            'sortable' => FALSE,
-            'type' => 'xs:string',
             'readonly' => FALSE,
             'required' => FALSE,
           ],
@@ -125,41 +128,60 @@ class schema__itemlocation extends ChadoField {
     $field_column = $this->instance['settings']['chado_column'];
     $base_table = $this->instance['settings']['base_table'];
 
-    $uri_term = chado_get_semweb_term('fileloc', 'uri');
-    $rank_term = chado_get_semweb_term('fileloc', 'rank');
-    $md5_term = chado_get_semweb_term('fileloc', 'md5checksum');
+    $name_term = chado_get_semweb_term('feature', 'name');
+    $type_term = chado_get_semweb_term('feature', 'type_id');
+    $rank_term = chado_get_semweb_term('feature_file', 'rank');
+
+    $schema = chado_get_schema($field_table);
+    $pkey = $schema['primary key'][0];
+    $fkey_lcolumn = key($schema['foreign keys'][$base_table]['columns']);
+    $fkey_rcolumn = $schema['foreign keys'][$base_table]['columns'][$fkey_lcolumn];
+    $linker_table = $base_table . '_file';
 
     // Set some defaults for the empty record.
     $entity->{$field_name}['und'][0] = [
       'value' => [],
-      'chado-fileloc__fileloc_id' => '',
-      'chado-fileloc__file_id' => '',
-      'chado-fileloc__uri' => '',
-      'chado-fileloc__rank' => '',
-      'chado-fileloc__md5checksum' => '',
+      'chado-' . $field_table . '__' . $pkey => '',
+      'chado-' . $field_table . '__' . $fkey_lcolumn => '',
+      'chado-' . $field_table . '__' . 'file_id' => '',
+      'chado-' . $field_table . '__' . 'rank' => '',
     ];
 
-    if ($record) {
+    // Get the list of publications
+    $files = [];
+    if ($linker_table) {
       $options = [
-        'return_array' => 1,
-        'order_by' => ['rank' => 'ASC'],
+        'return_array' => TRUE,
+        'include_fk' => [
+          'file_id' => [
+            'type_id' => TRUE,
+          ],
+        ],
+        'order_by' => [
+          'rank' => 'ASC'
+        ]
       ];
-      $record = chado_expand_var($record, 'table', 'fileloc', $options);
-      $fileloc_linkers = $record->fileloc;
-      if ($fileloc_linkers) {
-        foreach ($fileloc_linkers as $i => $fileloc) {
+      $record = chado_expand_var($record, 'table', $linker_table, $options);
+      $linked_files = $record->$linker_table;
+      if ($linked_files) {
+        $i = 0;
+        foreach ($linked_files as $linked_file) {
           $entity->{$field_name}['und'][$i] = [
             'value' => [
-              $uri_term => file_create_url($fileloc->uri),
-              $rank_term => $fileloc->rank,
-              $md5_term => $fileloc->md5checksum,
+              $name_term => $linked_file->file_id->name,
+              $type_term => $linked_file->file_id->type_id->name,
+              $rank_term => $linked_file->rank,
             ],
-            'chado-fileloc__fileloc_id' => $fileloc->fileloc_id,
-            'chado-fileloc__file_id' => $fileloc->file_id->file_id,
-            'chado-fileloc__uri' => $fileloc->uri,
-            'chado-fileloc__rank' => $fileloc->rank,
-            'chado-fileloc__md5checksum' => $fileloc->md5checksum,
+            'chado-' . $field_table . '__' . $pkey => $linked_file->$pkey,
+            'chado-' . $field_table . '__' . $fkey_lcolumn => $linked_file->$fkey_lcolumn,
+            'chado-' . $field_table . '__' . 'file_id' => $linked_file->file_id->file_id,
+            'chado-' . $field_table . '__' . 'rank' => $linked_file->rank,
           ];
+          // Is there a published entity for this license?
+          if (property_exists($linked_file->file_id, 'entity_id')) {
+            $entity->{$field_name}['und'][$i]['value']['entity'] = 'TripalEntity:' . $linked_file->file_id->entity_id;
+          }
+          $i++;
         }
       }
     }

@@ -3,7 +3,7 @@
 class schema__itemlocation_widget extends ChadoFieldWidget {
 
   // The default label for this field.
-  public static $default_label = 'Location';
+  public static $default_label = 'File Location';
 
   // The list of field types for which this formatter is appropriate.
   public static $field_types = ['schema__itemlocation'];
