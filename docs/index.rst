@@ -25,4 +25,7 @@ Development of the Tripal File module was funded by the `National Science Founda
    :caption: Tripal File Exetension Module
 
    ./install
+   ./overview
+   ./metadata
+   ./chado
 

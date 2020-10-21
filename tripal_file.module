@@ -249,6 +249,10 @@ function tripal_file_bundle_fields_info_alter(&$info, $bundle, $term) {
  */
 function tripal_file_bundle_instances_info_alter(&$info, $bundle, $term) {
 
+  if (array_key_exists('file_contact', $info)) {
+    $info['file_contact']['label'] = 'File Source';
+  }
+
   // Fields for the File content type.
   if ($bundle->accession == 'SIO:000396') {
     $info['schema__name']['widget']['type'] = 'text_textfield';
