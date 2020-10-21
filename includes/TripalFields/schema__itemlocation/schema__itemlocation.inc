@@ -65,6 +65,7 @@ class schema__itemlocation extends ChadoField {
     $uri_term = chado_get_semweb_term('fileloc', 'uri');
     $rank_term = chado_get_semweb_term('fileloc', 'rank');
     $md5_term = chado_get_semweb_term('fileloc', 'md5checksum');
+    $size_term = chado_get_semweb_term('fileloc', 'size');
 
     return [
       $field_term => [
@@ -104,6 +105,16 @@ class schema__itemlocation extends ChadoField {
             'readonly' => FALSE,
             'required' => FALSE,
           ],
+          $size_term => [
+            'searchable' => FALSE,
+            'label' => 'File Size',
+            'help' => 'The size of the file.',
+            'operations' => [],
+            'sortable' => FALSE,
+            'type' => 'xs:string',
+            'readonly' => FALSE,
+            'required' => FALSE,
+          ],
           'entity' => [
             'searchable' => FALSE,
           ],
@@ -128,6 +139,7 @@ class schema__itemlocation extends ChadoField {
     $uri_term = chado_get_semweb_term('fileloc', 'uri');
     $rank_term = chado_get_semweb_term('fileloc', 'rank');
     $md5_term = chado_get_semweb_term('fileloc', 'md5checksum');
+    $size_term = chado_get_semweb_term('fileloc', 'size');
 
     // Set some defaults for the empty record.
     $entity->{$field_name}['und'][0] = [
@@ -137,6 +149,7 @@ class schema__itemlocation extends ChadoField {
       'chado-fileloc__uri' => '',
       'chado-fileloc__rank' => '',
       'chado-fileloc__md5checksum' => '',
+      'chado-fileloc__size' => '',
     ];
 
     if ($record) {
@@ -153,12 +166,14 @@ class schema__itemlocation extends ChadoField {
               $uri_term => file_create_url($fileloc->uri),
               $rank_term => $fileloc->rank,
               $md5_term => $fileloc->md5checksum,
+              $size_term => $fileloc->size,
             ],
             'chado-fileloc__fileloc_id' => $fileloc->fileloc_id,
             'chado-fileloc__file_id' => $fileloc->file_id->file_id,
             'chado-fileloc__uri' => $fileloc->uri,
             'chado-fileloc__rank' => $fileloc->rank,
             'chado-fileloc__md5checksum' => $fileloc->md5checksum,
+            'chado-fileloc__size' => $fileloc->size,
           ];
         }
       }

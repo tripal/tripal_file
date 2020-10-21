@@ -18,14 +18,11 @@ class schema__itemlocation_widget extends ChadoFieldWidget {
     $record_id = '';
     $file_id = '';
     $uri = '';
-    $md5 = '';
+    $md5 = NULL;
+    $size = NULL;
     $remote = '';
     $local = '';
     $rank = $delta;
-
-    $uri_term = chado_get_semweb_term('fileloc', 'uri');
-    $rank_term = chado_get_semweb_term('fileloc', 'rank');
-    $md5_term = chado_get_semweb_term('fileloc', 'md5checksum');
 
     // If the field already has a value then it will come through the $items
     // array.  This happens when editing an existing record.
@@ -56,6 +53,10 @@ class schema__itemlocation_widget extends ChadoFieldWidget {
     $widget['chado-fileloc__rank'] = [
       '#type' => 'value',
       '#default_value' => $rank,
+    ];
+    $widget['chado-fileloc__size'] = [
+      '#type' => 'value',
+      '#default_value' => $size,
     ];
     $widget['chado-fileloc__md5checksum'] = [
       '#type' => 'value',
@@ -118,6 +119,18 @@ class schema__itemlocation_widget extends ChadoFieldWidget {
     }
     if (!$remote and !$local and $delta == 0) {
       form_set_error($field_name . '][und]['. $delta . '][remote', "Please specify a location as a URL or a Tripal managed file.");
+    }
+
+    // If the file is local then get the size and md5 checksum if one exists.
+    if ($local) {
+      $local_file = file_load($local);
+      $local_file_path = drupal_realpath($local_file->uri);
+      if (file_exists($local_file_path .'.md5')) {
+        $md5 = file_get_contents($local_file_path .'.md5');
+        $form_state['values'][$field_name]['und'][$delta]['chado-fileloc__md5checksum'] = $md5;
+      }
+      $size = filesize($local_file_path);
+      $form_state['values'][$field_name]['und'][$delta]['chado-fileloc__size'] = $size;
     }
 
     // If the user re-ordered the items then set the rank to match.

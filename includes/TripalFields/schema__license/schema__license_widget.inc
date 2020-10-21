@@ -23,7 +23,7 @@ class schema__license_widget extends ChadoFieldWidget {
     // array.  This happens when editing an existing record.
     if (count($items) > 0 and array_key_exists($delta, $items)) {
       $file_id = tripal_get_field_item_keyval($items, $delta, 'chado-file_license__file_id', $file_id);
-      $license_id = tripal_get_field_item_keyval($items, $delta, 'chado-file_license__license_id', $uri);
+      $license_id = tripal_get_field_item_keyval($items, $delta, 'chado-file_license__license_id', $license_id);
       $record_id = tripal_get_field_item_keyval($items, $delta, 'chado-file_license__file_license_id', $record_id);
     }
 
