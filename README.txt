@@ -1,4 +1,4 @@
-[![Documentation Status](https://readthedocs.org/projects/tripal_file/badge/?version=latest)](https://tripal-file.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/tripal_file/badge/?version=latest)](https://tripal-file.readthedocs.io/en/latest/?badge=latest)]
 
 The Tripal File module supports association of data files with content in a Chado database and for integration of those associations with content types on a Tripal website.
 
