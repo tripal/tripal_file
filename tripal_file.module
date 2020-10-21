@@ -67,7 +67,7 @@ function tripal_file_bundle_fields_info($entity_type, $bundle) {
     $info['sio__references_file'] = [
       'field_name' => 'sio__references_file',
       'type' => 'sio__references_file',
-      'cardinality' => 1,
+      'cardinality' => FIELD_CARDINALITY_UNLIMITED,
       'locked' => FALSE,
       'storage' => [
         'type' => 'field_chado_storage',
@@ -173,9 +173,9 @@ function tripal_file_bundle_instances_info($entity_type, $bundle) {
       'bundle' => $bundle->name,
       'label' => 'References',
       'description' => 'Content that referecnes this file.',
-      'required' => TRUE,
+      'required' => FALSE,
       'settings' => [
-        'auto_attach' => TRUE,
+        'auto_attach' => FALSE,
         'chado_table' => 'file',
         'chado_column' => 'file_id',
         'base_table' => 'file',

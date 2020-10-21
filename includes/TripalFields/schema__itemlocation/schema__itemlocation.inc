@@ -70,8 +70,8 @@ class schema__itemlocation extends ChadoField {
     return [
       $field_term => [
         'operations' => ['eq', 'contains', 'starts'],
-        'sortable' => TRUE,
-        'searchable' => TRUE,
+        'sortable' => FALSE,
+        'searchable' => FALSE,
         'type' => 'xs:complexType',
         'readonly' => FALSE,
         'elements' => [
