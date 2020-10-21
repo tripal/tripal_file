@@ -5,15 +5,15 @@ The Tripal File module supports association of data files with content in a Chad
 
 .. image:: https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/FAIR_data_principles.jpg/320px-FAIR_data_principles.jpg
 
-These associations are meant to support `FAIR data principles <https://www.go-fair.org/fair-principles/>`_ by integrating with Tripal content web serivces such that:
+These associations are meant to support `FAIR data principles <https://www.go-fair.org/fair-principles/>`_ by integrating with Tripal content web services such that:
 
-- Files are findable and accessible via Tripal's content web servcies.
+- Files are findable and accessible via Tripal's content web services.
 - Metadata about files use globally unique controlled vocabularies. These metadata can be assigned as properties of each file.   
 - License and usage details can be assigned to each file.
 
 This module provides two new content types for Tripal sites: File and License.  
 
-Development of the Tripal File module was funded by the `National Science Founation award #1659300 <https://nsf.gov/awardsearch/showAward?AWD_ID=1659300>`_.
+Development of the Tripal File module was funded by the `National Science Foundation award #1659300 <https://nsf.gov/awardsearch/showAward?AWD_ID=1659300>`_.
 
 .. note::
 
