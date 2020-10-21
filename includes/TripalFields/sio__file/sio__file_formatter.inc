@@ -30,6 +30,9 @@ class sio__file_formatter extends ChadoFieldFormatter {
     $rows = [];
 
     foreach ($items as $item) {
+      if (empty($item['value'])) {
+        continue;
+      }
       [$content_type, $entity_id] = array_key_exists('entity', $item['value']) ? explode(':', $item['value']['entity']) : [NULL, NULL];
       $rows[] = [
         $entity_id ? l($item['value'][$name_term], 'bio_data/' . $entity_id) : $item['value'][$name_term],
@@ -39,7 +42,7 @@ class sio__file_formatter extends ChadoFieldFormatter {
 
     $content = '';
     $headers = ['File', 'Type'];
-    if (count($items) > 0) {
+    if (count($rows) > 0) {
       $table = [
         'header' => $headers,
         'rows' => $rows,
@@ -53,13 +56,12 @@ class sio__file_formatter extends ChadoFieldFormatter {
         'empty' => 'There are no locations for this file.',
       ];
       $content = theme_table($table);
+
+      $element[0] = [
+        // We create a render array to produce the desired markup,
+        '#type' => 'markup',
+        '#markup' => $content,
+      ];
     }
-
-    $element[0] = [
-      // We create a render array to produce the desired markup,
-      '#type' => 'markup',
-      '#markup' => $content,
-    ];
-
   }
 }

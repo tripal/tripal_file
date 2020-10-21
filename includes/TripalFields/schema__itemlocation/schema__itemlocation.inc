@@ -166,7 +166,7 @@ class schema__itemlocation extends ChadoField {
               $uri_term => file_create_url($fileloc->uri),
               $rank_term => $fileloc->rank,
               $md5_term => $fileloc->md5checksum,
-              $size_term => $fileloc->size,
+              $size_term => tripal_format_bytes($fileloc->size),
             ],
             'chado-fileloc__fileloc_id' => $fileloc->fileloc_id,
             'chado-fileloc__file_id' => $fileloc->file_id->file_id,

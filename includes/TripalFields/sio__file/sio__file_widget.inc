@@ -96,8 +96,6 @@ class sio__file_widget extends ChadoFieldWidget {
     $pkey = $schema['primary key'][0];
     $fkey_lcolumn = key($schema['foreign keys'][$base_table]['columns']);
 
-    dpm($form_state['values'][$field_name]['und'][$delta]);
-
     // If the user re-ordered the items then set the rank to match.
     $rank = $form_state['values'][$field_name]['und'][$delta]['_weight'];
     $form_state['values'][$field_name]['und'][$delta]['chado-' . $field_table . '__' . 'rank'] = $rank;

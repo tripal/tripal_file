@@ -58,7 +58,7 @@ class schema__itemlocation_formatter extends ChadoFieldFormatter {
          }
        }
        $uri = l('Download', $fileloc[$uri_term]);
-       $size = !empty($item['value'][$size_term]) ? tripal_format_bytes($item['value'][$size_term]) : 'N/A';
+       $size = !empty($item['value'][$size_term]) ? $item['value'][$size_term] : 'N/A';
        $md5 = !empty($item['value'][$md5_term]) ? $item['value'][$md5_term] : 'N/A';
 
        $element[0][] = [

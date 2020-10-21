@@ -63,6 +63,16 @@ function tripal_file_bundle_fields_info($entity_type, $bundle) {
         'type' => 'field_chado_storage',
       ],
     ];
+
+    $info['sio__references_file'] = [
+      'field_name' => 'sio__references_file',
+      'type' => 'sio__references_file',
+      'cardinality' => 1,
+      'locked' => FALSE,
+      'storage' => [
+        'type' => 'field_chado_storage',
+      ],
+    ];
   }
 
   // If this a _file linker table exists for the base data table.
@@ -152,6 +162,37 @@ function tripal_file_bundle_instances_info($entity_type, $bundle) {
         'default' => [
           'label' => 'inline',
           'type' => 'schema__license_formatter',
+          'settings' => [],
+        ],
+      ],
+    ];
+
+    $info['sio__references_file'] = [
+      'field_name' => 'sio__references_file',
+      'entity_type' => 'TripalEntity',
+      'bundle' => $bundle->name,
+      'label' => 'References',
+      'description' => 'Content that referecnes this file.',
+      'required' => TRUE,
+      'settings' => [
+        'auto_attach' => TRUE,
+        'chado_table' => 'file',
+        'chado_column' => 'file_id',
+        'base_table' => 'file',
+        'term_accession' => '000631',
+        'term_vocabulary' => 'SIO',
+        'term_name' => 'references',
+      ],
+      'widget' => [
+        'type' => 'sio__references_file_widget',
+        'settings' => [
+          'display_label' => 1,
+        ],
+      ],
+      'display' => [
+        'default' => [
+          'label' => 'inline',
+          'type' => 'sio__references_file_formatter',
           'settings' => [],
         ],
       ],
