@@ -13,7 +13,7 @@ These associations are meant to support `FAIR data principles <https://www.go-fa
 
 This module provides two new content types for Tripal sites: File and License.  
 
-Development of the Tripal File module was funded by the `National Science Foundation award #1659300 <https://nsf.gov/awardsearch/showAward?AWD_ID=1659300>`_.
+Development of the Tripal File module was funded by the `National Science Foundation award #1659300 <https://nsf.gov/awardsearch/showAward?AWD_ID=1659300>`_ and the `National Research Support Program (NRSP) 10 project <https://www.nrsp10.org/>`.
 
 .. note::
 
