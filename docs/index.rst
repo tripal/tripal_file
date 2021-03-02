@@ -8,6 +8,3 @@ Tripal File Extension Module
    ./overview
    ./install
    ./usage
-   ./web_services
-   ./metadata
-   ./chado
