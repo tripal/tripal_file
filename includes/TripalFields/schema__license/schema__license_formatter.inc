@@ -28,22 +28,46 @@ class schema__license_formatter extends ChadoFieldFormatter {
     $uri_term = chado_get_semweb_term('license', 'uri');
 
     [$content_type, $entity_id] = array_key_exists('entity', $items[0]['value']) ? explode(':', $items[0]['value']['entity']) : [NULL, NULL];
-    $element[] = [
+    $rows = [];
+    $rows[] = [
       [
-        '#type' => 'item',
-        '#title' => 'License Name',
-        '#markup' => $entity_id ? l($items[0]['value'][$name_term], 'bio_data/' . $entity_id) : $items[0]['value'][$name_term],
+        'data' => 'Name',
+        'header' => TRUE,
       ],
+      $entity_id ? l($items[0]['value'][$name_term], 'bio_data/' . $entity_id) : $items[0]['value'][$name_term],
+    ];
+    $rows[] = [
       [
-        '#type' => 'item',
-        '#title' => 'Summary',
-        '#markup' => $items[0]['value'][$summary_term],
+        'data' => 'License Summary',
+        'header' => TRUE,
       ],
+      $items[0]['value'][$summary_term],
+    ];
+    $rows[] = [
       [
-        '#type' => 'item',
-        '#title' => 'Full Details',
-        '#markup' => $items[0]['value'][$uri_term] ? l($items[0]['value'][$uri_term], $items[0]['value'][$uri_term]) : '<i>Not Available</i>',
+        'data' => 'Full Legal Text',
+        'header' => TRUE,
+        'width' => '20%'
       ],
+      $items[0]['value'][$uri_term] ? l($items[0]['value'][$uri_term], $items[0]['value'][$uri_term]) : '<i>Not Available</i>',
+    ];
+
+    $table = [
+      'header' => [],
+      'rows' => $rows,
+      'attributes' => [
+        'class' => 'tripal-data-table',
+      ],
+      'sticky' => FALSE,
+      'caption' => "",
+      'colgroups' => [],
+    ];
+    $content = theme_table($table);
+
+    $element[0] = [
+      // We create a render array to produce the desired markup,
+      '#type' => 'markup',
+      '#markup' => $content,
     ];
   }
 }

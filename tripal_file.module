@@ -109,8 +109,8 @@ function tripal_file_bundle_instances_info($entity_type, $bundle) {
       'field_name' => 'schema__itemlocation',
       'entity_type' => 'TripalEntity',
       'bundle' => $bundle->name,
-      'label' => 'Location',
-      'description' => 'The location of the file.',
+      'label' => 'Download',
+      'description' => 'The download location of the file.',
       'required' => TRUE,
       'settings' => [
         'auto_attach' => TRUE,

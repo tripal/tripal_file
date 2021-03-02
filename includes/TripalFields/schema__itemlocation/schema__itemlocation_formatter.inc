@@ -29,7 +29,7 @@ class schema__itemlocation_formatter extends ChadoFieldFormatter {
     $md5_term = chado_get_semweb_term('fileloc', 'md5checksum');
     $size_term = chado_get_semweb_term('fileloc', 'size');
 
-    $content = [];
+    $rows = [];
     foreach ($items as $i => $item) {
        $fileloc = $item['value'];
        if (!$fileloc) {
@@ -57,24 +57,30 @@ class schema__itemlocation_formatter extends ChadoFieldFormatter {
            $source = variable_get('site_name');
          }
        }
-       $uri = l('Download', $fileloc[$uri_term]);
-       $size = !empty($item['value'][$size_term]) ? $item['value'][$size_term] : 'N/A';
-       $md5 = !empty($item['value'][$md5_term]) ? $item['value'][$md5_term] : 'N/A';
+       $uri = l($source, $fileloc[$uri_term]);
+       $size = $item['value'][$size_term] !== '0B' ? $item['value'][$size_term] : 'N/A';
+       $md5 = $item['value'][$md5_term] !== '' ? $item['value'][$md5_term] : 'N/A';
 
-       $element[0][] = [
-         '#type' => 'item',
-         '#title' => 'Source: ' . $source,
-         '#markup' => '<p>' . $uri . '<br>Size: ' . $size . '<br> MD5: ' . $md5 . '</p>',
-       ];
+       $rows[] = [$uri, $size, $md5];
      }
 
-    $headers = ['Available at', 'Size', 'MD5'];
-    if (count($items) == 0) {
-      $element[0] = [
-        // We create a render array to produce the desired markup,
-        '#type' => 'markup',
-        '#markup' => 'This file is currently not available for retrieval',
-      ];
-    }
+    $table = [
+      'header' => ['Available at', 'Size', 'MD5'],
+      'rows' => $rows,
+      'attributes' => [
+        'class' => 'tripal-data-table',
+      ],
+      'sticky' => FALSE,
+      'caption' => "",
+      'colgroups' => [],
+      'empty' => 'This file is currently not available for download.'
+    ];
+    $content = theme_table($table);
+
+    $element[0] = [
+      // We create a render array to produce the desired markup,
+      '#type' => 'markup',
+      '#markup' => $content,
+    ];
   }
 }

@@ -143,6 +143,7 @@ class schema__license extends ChadoField {
       $file_licenses = $record->file_license;
       if ($file_licenses) {
         foreach ($file_licenses as $i => $license) {
+          $license = chado_expand_var($license, 'field', 'license.summary');
           $entity->{$field_name}['und'][$i] = [
             'value' => [
               $name_term => $license->license_id->name,
