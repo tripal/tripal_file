@@ -10,8 +10,8 @@
 
 // EXPLANATION: include any files needed for this module.  That includes any
 // API file, the theme file, or include files.
-require('api/tripal_file.api.inc');
-require('theme/tripal_file.theme.inc');
+require_once('api/tripal_file.api.inc');
+require_once('theme/tripal_file.theme.inc');
 
 
 /**
