@@ -149,7 +149,15 @@ If you already have the file uploaded to Tripal then it will automatically appea
 
 .. image:: ./file_add2.png
 
-Otherwise you can provide a remote URL for the file.
+Otherwise you can provide a remote URL for the file. If you have files on your site that are not
+managed by Tripal, you can use a URL here that points to the full path on your site. In both of these
+cases file size and md5 checksum cannot be automatically generated. Alternatively, you can use
+a public:// prefix for local files, in which case the file size and md5 checksum can be
+automatically included. As an example, you might upload a file to your local filesystem in the
+directory
+`sites/default/files/bulk_data/`
+and then you could specify a Remote URL of
+`public://bulk_data/Citrus_sinensis-scaffold00001.fasta`
 
 .. note::
 

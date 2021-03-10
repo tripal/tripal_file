@@ -64,7 +64,7 @@ class schema__itemlocation_widget extends ChadoFieldWidget {
     ];
 
     // Set the remote or local value based on what the value of the
-    // fieloc.uri field.
+    // fileloc.uri field.
     if ($uri) {
       if (preg_match('/^(http|ftp)/', $uri)) {
         $remote = $uri;
@@ -75,6 +75,10 @@ class schema__itemlocation_widget extends ChadoFieldWidget {
         $query->distinct();
         $query->condition('FM.uri', $uri);
         $local = $query->execute()->fetchField();
+        // we can also use the public:// prefix with local files not managed by tripal
+        if (!$local) {
+          $remote = $uri;
+        }
       }
     }
 
@@ -121,16 +125,38 @@ class schema__itemlocation_widget extends ChadoFieldWidget {
       form_set_error($field_name . '][und]['. $delta . '][remote', "Please specify a location as a URL or a Tripal managed file.");
     }
 
-    // If the file is local then get the size and md5 checksum if one exists.
+    // If the file is local then get the size, and get the md5 checksum if one exists.
+    $local_file_path = '';
     if ($local) {
       $local_file = file_load($local);
       $local_file_path = drupal_realpath($local_file->uri);
-      if (file_exists($local_file_path .'.md5')) {
-        $md5 = file_get_contents($local_file_path .'.md5');
-        $form_state['values'][$field_name]['und'][$delta]['chado-fileloc__md5checksum'] = $md5;
+      $which_element = 'local';
+    }
+    // A remote url here with a public:// prefix is a local file, but not managed by
+    // tripal. We can still look up file size and checksum the same as managed files.
+    elseif ( ($remote) and (preg_match('/^public:\/\//', $remote)) ) {
+      $local_file_path = drupal_realpath($remote);
+      $which_element = 'remote';
+    }
+    if ($local_file_path) {
+      if (file_exists($local_file_path)) {
+        if (file_exists($local_file_path .'.md5')) {
+          // substr here because non-managed md5 files might also contain a file name after
+          // the checksum if generated using the md5sum program, and do extra verification.
+          $md5 = substr(file_get_contents($local_file_path .'.md5'), 0, 32);
+          if (preg_match('/^[A-Za-z0-9]{32}$/', $md5)) {
+            $form_state['values'][$field_name]['und'][$delta]['chado-fileloc__md5checksum'] = $md5;
+          }
+          else {
+            form_set_error($field_name . '][und]['. $delta . '][' . $which_element, "The file \"${local_file_path}.md5\" contains an invalid md5 checksum.");
+          }
+        }
+        $size = filesize($local_file_path);
+        $form_state['values'][$field_name]['und'][$delta]['chado-fileloc__size'] = $size;
       }
-      $size = filesize($local_file_path);
-      $form_state['values'][$field_name]['und'][$delta]['chado-fileloc__size'] = $size;
+      else {
+        form_set_error($field_name . '][und]['. $delta . '][' . $which_element, "\"$remote\" does not exist on the local filesystem.");
+      }
     }
 
     // If the user re-ordered the items then set the rank to match.
