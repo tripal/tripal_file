@@ -61,6 +61,7 @@ class schema__license_formatter extends ChadoFieldFormatter {
       'sticky' => FALSE,
       'caption' => "",
       'colgroups' => [],
+      'empty' => 'There is no license for this file.',
     ];
     $content = theme_table($table);
 
