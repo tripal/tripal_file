@@ -172,7 +172,7 @@ function tripal_file_bundle_instances_info($entity_type, $bundle) {
       'entity_type' => 'TripalEntity',
       'bundle' => $bundle->name,
       'label' => 'References',
-      'description' => 'Content that referecnes this file.',
+      'description' => 'Content that references this file.',
       'required' => FALSE,
       'settings' => [
         'auto_attach' => FALSE,
