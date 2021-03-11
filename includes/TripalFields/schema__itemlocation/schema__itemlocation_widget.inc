@@ -174,7 +174,7 @@ class schema__itemlocation_widget extends ChadoFieldWidget {
     // Set the File URI value according to the user's selection.
     if ($unmanaged) {
       $form_state['values'][$field_name]['und'][$delta]['chado-fileloc__uri'] = $unmanaged;
-     }
+    }
     elseif ($managed) {
       $file = file_load($managed);
       $form_state['values'][$field_name]['und'][$delta]['chado-fileloc__uri'] = $file->uri;
