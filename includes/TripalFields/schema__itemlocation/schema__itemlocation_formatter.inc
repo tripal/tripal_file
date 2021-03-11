@@ -53,7 +53,8 @@ class schema__itemlocation_formatter extends ChadoFieldFormatter {
 
          // Check if the base URL of the file is from this site.
          global $base_url;
-         if ($base_url == 'http://' . $url_parts['host']) {
+         if ( ($base_url == 'http://' . $url_parts['host']) or
+              ($base_url == 'https://' . $url_parts['host']) ) {
            $source = variable_get('site_name');
          }
        }

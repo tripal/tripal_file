@@ -91,7 +91,7 @@ function tripal_file_bundle_fields_info($entity_type, $bundle) {
 }
 
 /**
- * Impelments hook_create_tripalfield_instance().
+ * Implements hook_create_tripalfield_instance().
  *
  * This is a Tripal defined hook that supports integration with the
  * TripalEntity field.
