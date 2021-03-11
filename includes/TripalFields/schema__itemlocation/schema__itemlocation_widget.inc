@@ -117,10 +117,10 @@ class schema__itemlocation_widget extends ChadoFieldWidget {
     $unmanaged = $form_state['values'][$field_name]['und'][$delta]['unmanaged'];
     $managed = $form_state['values'][$field_name]['und'][$delta]['managed'];
     if ($unmanaged and $managed) {
-      form_set_error($field_name . '][und]['. $delta . '][remote', "For the file location, please provide only a URL or Tripal managed file but not both.");
+      form_set_error($field_name . '][und]['. $delta . '][unmanaged', "For the file location, please provide only a URL or Tripal managed file but not both.");
     }
     if (!$unmanaged and !$managed and $delta == 0) {
-      form_set_error($field_name . '][und]['. $delta . '][remote', "Please specify a location as a URL or a Tripal managed file.");
+      form_set_error($field_name . '][und]['. $delta . '][unmanaged', "Please specify a location as a URL or a Tripal managed file.");
     }
 
     // If the file is local then get the size, and get the md5 checksum if one exists.
