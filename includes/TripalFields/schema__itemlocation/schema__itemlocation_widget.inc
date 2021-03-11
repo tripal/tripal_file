@@ -20,8 +20,8 @@ class schema__itemlocation_widget extends ChadoFieldWidget {
     $uri = '';
     $md5 = NULL;
     $size = NULL;
-    $remote = '';
-    $local = '';
+    $unmanaged = '';
+    $managed = '';
     $rank = $delta;
 
     // If the field already has a value then it will come through the $items
@@ -66,27 +66,25 @@ class schema__itemlocation_widget extends ChadoFieldWidget {
     // Set the remote or local value based on what the value of the
     // fileloc.uri field.
     if ($uri) {
-      if (preg_match('/^(http|ftp)/', $uri)) {
-        $remote = $uri;
-      }
-      else {
-        $query = db_select('file_managed', 'FM');
-        $query->fields('FM', ['fid']);
-        $query->distinct();
-        $query->condition('FM.uri', $uri);
-        $local = $query->execute()->fetchField();
-        // we can also use the public:// prefix with local files not managed by tripal
-        if (!$local) {
-          $remote = $uri;
-        }
+      // test if this is a file managed by Tripal e.g. public://tripal/users/1/filename
+      $query = db_select('file_managed', 'FM');
+      $query->fields('FM', ['fid']);
+      $query->distinct();
+      $query->condition('FM.uri', $uri);
+      $managed = $query->execute()->fetchField();
+      
+      // if not a managed file, it can be a remote url with http:// https:// or ftp://
+      // prefix or a local unmanaged file with public:// prefix
+      if (!$managed) {
+        $unmanaged = $uri;
       }
     }
 
-    $widget['remote'] = [
+    $widget['unmanaged'] = [
       '#type' => 'textfield',
-      '#title' => t('Remote URL'),
-      '#description' => t('If the file is not managed by Drupal or Tripal then enter the full URL to the file. Use this field if the file is shared publicly on this same web server but not managed by Drupal or Tripal.'),
-      '#default_value' => $remote,
+      '#title' => t('URL'),
+      '#description' => t('If the file is not managed by Drupal or Tripal then enter the full URL to the file. Use this field with public:// prefix if the file is shared publicly on this same web server but not managed by Drupal or Tripal.'),
+      '#default_value' => $unmanaged,
       '#maxlength' => 100000,
     ];
 
@@ -97,11 +95,11 @@ class schema__itemlocation_widget extends ChadoFieldWidget {
     foreach ($files as $fid => $file) {
       $options[$fid] = $file->filename;
     }
-    $widget['local'] = [
+    $widget['managed'] = [
       '#type' => 'select',
       '#title' => t('Tripal Managed File'),
       '#options' => $options,
-      '#default_value' => $local,
+      '#default_value' => $managed,
       '#description' => t('Please select a file.'),
     ];
 
@@ -116,30 +114,39 @@ class schema__itemlocation_widget extends ChadoFieldWidget {
     $field_name = $this->field['field_name'];
 
     // Perform validation of form elements.
-    $remote = $form_state['values'][$field_name]['und'][$delta]['remote'];
-    $local = $form_state['values'][$field_name]['und'][$delta]['local'];
-    if ($remote and $local) {
+    $unmanaged = $form_state['values'][$field_name]['und'][$delta]['unmanaged'];
+    $managed = $form_state['values'][$field_name]['und'][$delta]['managed'];
+    if ($unmanaged and $managed) {
       form_set_error($field_name . '][und]['. $delta . '][remote', "For the file location, please provide only a URL or Tripal managed file but not both.");
     }
-    if (!$remote and !$local and $delta == 0) {
+    if (!$unmanaged and !$managed and $delta == 0) {
       form_set_error($field_name . '][und]['. $delta . '][remote', "Please specify a location as a URL or a Tripal managed file.");
     }
 
     // If the file is local then get the size, and get the md5 checksum if one exists.
     $local_file_path = '';
-    if ($local) {
-      $local_file = file_load($local);
+    if ($managed) {
+      $which_element = 'managed';
+      $local_file = file_load($managed);
       $local_file_path = drupal_realpath($local_file->uri);
-      $which_element = 'local';
     }
-    // A remote url here with a public:// prefix is a local file, but not managed by
-    // tripal. We can still look up file size and checksum the same as managed files.
-    elseif ( ($remote) and (preg_match('/^public:\/\//', $remote)) ) {
-      $local_file_path = drupal_realpath($remote);
-      $which_element = 'remote';
+    // A URL here with a public:// prefix is a local file, but not managed by tripal.
+    // We can look up file size and checksum for all local files whether managed or not.
+    elseif ($unmanaged) {
+      $which_element = 'unmanaged';
+      if (preg_match('#^public://#', $unmanaged)) {
+        $local_file_path = drupal_realpath($unmanaged);
+        if (!$local_file_path) {
+          form_set_error($field_name . '][und]['. $delta . '][' . $which_element, "The file \"$unmanaged\" does not exist on the local filesystem.");
+        }
+      }
+      // remote URLs get no validation beyond having a recognized scheme
+      elseif (!preg_match('#^https?://|ftp://#i', $unmanaged)) {
+        form_set_error($field_name . '][und]['. $delta . '][' . $which_element, "Invalid URL \"$unmanaged\": must have http:// https:// ftp:// or public:// prefix.");
+      }
     }
     if ($local_file_path) {
-      if (file_exists($local_file_path)) {
+       if (file_exists($local_file_path)) {
         if (file_exists($local_file_path .'.md5')) {
           // substr here because non-managed md5 files might also contain a file name after
           // the checksum if generated using the md5sum program, and do extra verification.
@@ -155,7 +162,7 @@ class schema__itemlocation_widget extends ChadoFieldWidget {
         $form_state['values'][$field_name]['und'][$delta]['chado-fileloc__size'] = $size;
       }
       else {
-        form_set_error($field_name . '][und]['. $delta . '][' . $which_element, "\"$remote\" does not exist on the local filesystem.");
+        form_set_error($field_name . '][und]['. $delta . '][' . $which_element, "The file \"$local_file_path\" does not exist on the local filesystem.");
       }
     }
 
@@ -165,11 +172,11 @@ class schema__itemlocation_widget extends ChadoFieldWidget {
 
 
     // Set the File URI value according to the user's selection.
-    if ($remote) {
-      $form_state['values'][$field_name]['und'][$delta]['chado-fileloc__uri'] = $remote;
-    }
-    elseif ($local) {
-      $file = file_load($local);
+    if ($unmanaged) {
+      $form_state['values'][$field_name]['und'][$delta]['chado-fileloc__uri'] = $unmanaged;
+     }
+    elseif ($managed) {
+      $file = file_load($managed);
       $form_state['values'][$field_name]['und'][$delta]['chado-fileloc__uri'] = $file->uri;
     }
     // If no file is selected then clear out all values but the Pkey so the

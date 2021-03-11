@@ -165,9 +165,14 @@ class schema__itemlocation extends ChadoField {
           if (preg_match('/^\d+$/', $filesize)) {
             $filesize = tripal_format_bytes($filesize);
           }
+          // ftp:// won't pass through file_create_url()
+          $uri = file_create_url($fileloc->uri);
+          if (!$uri) {
+            $uri = $fileloc->uri;
+          }
           $entity->{$field_name}['und'][$i] = [
             'value' => [
-              $uri_term => file_create_url($fileloc->uri),
+              $uri_term => $uri,
               $rank_term => $fileloc->rank,
               $md5_term => $fileloc->md5checksum,
               $size_term => $filesize,
