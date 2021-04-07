@@ -198,13 +198,20 @@ class sio__references_file extends ChadoField {
           }
 
           // Add in the name and uniquename (identifier) if those fields exist.
+          // If name does not exist, e.g. for publication, use title
+          if (property_exists($record, 'uniquename')) {
+            $entity->{$field_name}['und'][$delta]['value']['data:0842'] = $record->uniquename;
+          }
           if (property_exists($record, 'name')) {
             $entity->{$field_name}['und'][$delta]['value']['schema:name'] = $record->name;
           }
-          if (property_exists($record, 'uniquename')) {
-            $entity->{$field_name}['und'][$delta]['value']['data:0842'] = $record->name;
+          else if (property_exists($record, 'title')) {
+            $entity->{$field_name}['und'][$delta]['value']['schema:name'] = $record->title;
           }
-
+          else {
+            // if we reach here, a new handler needs to be added, but for now add a placeholder
+            $entity->{$field_name}['und'][$delta]['value']['schema:name'] = 'Link';
+          }
 
           // If this is the organism table then we will create the name
           // specially.
