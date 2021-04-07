@@ -246,7 +246,7 @@ The *fileprop* table holds the properties or metadata about files. The CV term i
 
 The fileloc Table
 +++++++++++++++++
-The *fileloc* table indicates where files can be downloaded. The *uri* column must contain the URI of the file. Even local files have a URI. For example a Drupal URI usually has a  *public://* URI prefix. For example: ```public://tripal/users/1/Citrus_sinensis-scaffold0.fasta```. When a file has more than one location to download the can be ordered by setting the *rank* column.  The Tripal file module automatically fills in the *size* and *md5checksum* values for local files. If you are adding file locations via the bulk loader you must provide these or they will not be available.
+The *fileloc* table indicates where files can be downloaded. The *uri* column must contain the URI of the file. Even local files have a URI. For example a Drupal URI usually has a  *public://* URI prefix. For example: ```public://tripal/users/1/Citrus_sinensis-scaffold0.fasta```. When a file has more than one location to download the can be ordered by setting the *rank* column.  The Tripal file module automatically fills in the *size* and *md5checksum* values for local files. If you are adding file locations via the bulk loader you must provide these or the will not be available.
 
 +-------------+------------+------+---------------+---------------------------+
 | Column      | Type	   | Null | Default Value | Constraint                |
