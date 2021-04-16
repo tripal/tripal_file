@@ -97,7 +97,7 @@ class schema__license extends ChadoField {
           $summary_term => [
             'searchable' => FALSE,
             'label' => 'Summary',
-            'help' => 'A brief summary describing the user priviledges under the license.',
+            'help' => 'A brief summary describing the user privileges under the license.',
             'operations' => [],
             'sortable' => FALSE,
             'type' => 'xs:string',

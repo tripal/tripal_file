@@ -37,7 +37,7 @@ class sio__references_file extends ChadoField {
     'term_fixed' => FALSE,
     // The table in Chado that the instance maps to.
     'chado_table' => 'file',
-    // The primary key column of hte table in Dhado.
+    // The primary key column of the table in Chado.
     'chado_column' => 'file_id',
     // The base table.
     'base_table' => 'file',

@@ -75,7 +75,7 @@ function tripal_file_bundle_fields_info($entity_type, $bundle) {
     ];
   }
 
-  // If this a _file linker table exists for the base data table.
+  // If a _file linker table exists for the base data table.
   if (chado_table_exists($chado_bundle->data_table . '_file')) {
     $info['sio__file'] = [
       'field_name' => 'sio__file',
@@ -199,7 +199,7 @@ function tripal_file_bundle_instances_info($entity_type, $bundle) {
     ];
   }
 
-  // If this a _file linker table exists for the base data table.
+  // If a _file linker table exists for the base data table.
   if (chado_table_exists($chado_bundle->data_table . '_file')) {
     $base_table = $chado_bundle->data_table;
     $chado_table = $chado_bundle->data_table . '_file';
