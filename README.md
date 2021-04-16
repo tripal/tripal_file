@@ -17,4 +17,4 @@ Development of the Tripal File module was funded by the [National Science Founda
 
 ## Documentation
 
-Please see the [online documentation](https://tripal-file.readthedocs.io/en/latest/) for installation and usage instructinos.
+Please see the [online documentation](https://tripal-file.readthedocs.io/en/latest/) for installation and usage instructions.
