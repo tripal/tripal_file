@@ -28,6 +28,7 @@ class schema__itemlocation_formatter extends ChadoFieldFormatter {
     $rank_term = chado_get_semweb_term('fileloc', 'rank');
     $md5_term = chado_get_semweb_term('fileloc', 'md5checksum');
     $size_term = chado_get_semweb_term('fileloc', 'size');
+    $display_file_name = variable_get('tripal_file_display_file_name', FALSE);
 
     $rows = [];
     foreach ($items as $i => $item) {
@@ -62,7 +63,12 @@ class schema__itemlocation_formatter extends ChadoFieldFormatter {
        $size = $item['value'][$size_term] !== '0B' ? $item['value'][$size_term] : 'N/A';
        $md5 = $item['value'][$md5_term] !== '' ? $item['value'][$md5_term] : 'N/A';
 
-       $rows[] = [$uri, $size, $md5];
+       $row = [$uri, $size, $md5];
+       // ability to display file name as left column can be enabled in admin interface
+       if ($display_file_name) {
+         array_unshift($row, basename($fileloc[$uri_term]));
+       }
+       $rows[] = $row;
      }
 
     $table = [
@@ -76,6 +82,9 @@ class schema__itemlocation_formatter extends ChadoFieldFormatter {
       'colgroups' => [],
       'empty' => 'This file is currently not available for download.'
     ];
+    if ($display_file_name) {
+      array_unshift($table['header'], 'File Name');
+    }
     $content = theme_table($table);
 
     $element[0] = [
