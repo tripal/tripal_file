@@ -66,7 +66,12 @@ class schema__itemlocation_formatter extends ChadoFieldFormatter {
        $row = [$uri, $size, $md5];
        // ability to display file name as left column can be enabled in admin interface
        if ($display_file_name) {
-         array_unshift($row, basename($fileloc[$uri_term]));
+         $displayname = basename($fileloc[$uri_term]);
+         // URLs can be a messy POST with multiple parameters, which is hard to
+         // simplify, but we can at least remove anything before a question mark
+         // e.g. downloadSupplement?doi=10.123%2F456&file=filename.txt
+         $displayname = preg_replace('/^.*\?/', '', $displayname);
+         array_unshift($row, $displayname);
        }
        $rows[] = $row;
      }
