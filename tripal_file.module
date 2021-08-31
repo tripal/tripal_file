@@ -22,7 +22,7 @@ function tripal_file_menu() {
   // tripal file administration page
   $items['admin/tripal/extension/tripal_file'] = [
     'title' => 'Tripal File User Interface',
-    'description' => 'DEBUG A module for associating files with Tripal content and for accessing files via web services.',
+    'description' => 'A module for associating files with Tripal content and for accessing files via web services.',
     'page callback' => 'drupal_get_form',
     'page arguments' => ['tripal_file_admin_form'],
     'access arguments' => ['administer tripal'],
