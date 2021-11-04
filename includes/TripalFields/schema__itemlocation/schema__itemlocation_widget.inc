@@ -18,17 +18,20 @@ class schema__itemlocation_widget extends ChadoFieldWidget {
     $record_id = '';
     $file_id = '';
     $uri = '';
+    $display_name = '';
     $md5 = NULL;
     $size = NULL;
     $unmanaged = '';
     $managed = '';
     $rank = $delta;
+    $display_file_name = variable_get('tripal_file_display_file_name', FALSE);
 
     // If the field already has a value then it will come through the $items
     // array.  This happens when editing an existing record.
     if (count($items) > 0 and array_key_exists($delta, $items)) {
       $file_id = tripal_get_field_item_keyval($items, $delta, 'chado-fileloc__file_id', $file_id);
       $uri = tripal_get_field_item_keyval($items, $delta, 'chado-fileloc__uri', $uri);
+      $display_name = tripal_get_field_item_keyval($items, $delta, 'chado-fileloc__display_name', $display_name);
       $rank = tripal_get_field_item_keyval($items, $delta, 'chado-fileloc__rank', $rank);
       $record_id = tripal_get_field_item_keyval($items, $delta, 'chado-fileloc__fileloc_id', $record_id);
       $md5 = tripal_get_field_item_keyval($items, $delta, 'chado-fileloc__md5checksum', $md5);
@@ -103,6 +106,18 @@ class schema__itemlocation_widget extends ChadoFieldWidget {
       '#description' => t('Please select a file.'),
     ];
 
+    // The display name option can be enabled in the admin settings.
+    if ($display_file_name) {
+      $widget['chado-fileloc__display_name'] = [
+        '#type' => 'textfield',
+        '#title' => t('Display Name'),
+        '#description' => t('Enter an optional alternative name to display if there is no file name'
+                           .' included in the URL. This applies only when file name display is'
+                           .' enabled in the admin settings.'),
+        '#default_value' => $display_name,
+        '#maxlength' => 500,
+      ];
+    }
   }
 
 
@@ -146,7 +161,7 @@ class schema__itemlocation_widget extends ChadoFieldWidget {
       }
     }
     if ($local_file_path) {
-       if (file_exists($local_file_path)) {
+      if (file_exists($local_file_path)) {
         if (file_exists($local_file_path .'.md5')) {
           // substr here because non-managed md5 files might also contain a file name after
           // the checksum if generated using the md5sum program, and do extra verification.
@@ -171,7 +186,7 @@ class schema__itemlocation_widget extends ChadoFieldWidget {
     $form_state['values'][$field_name]['und'][$delta]['chado-fileloc__rank'] = $rank;
 
 
-    // Set the File URI value according to the user's selection.
+    // Set the File URI value and display name according to the user's selection.
     if ($unmanaged) {
       $form_state['values'][$field_name]['und'][$delta]['chado-fileloc__uri'] = $unmanaged;
     }
@@ -184,6 +199,7 @@ class schema__itemlocation_widget extends ChadoFieldWidget {
     else {
       $form_state['values'][$field_name]['und'][$delta]['chado-fileloc__file_id'] = '';
       $form_state['values'][$field_name]['und'][$delta]['chado-fileloc__uri'] = '';
+      $form_state['values'][$field_name]['und'][$delta]['chado-fileloc__display_name'] = '';
       $form_state['values'][$field_name]['und'][$delta]['chado-fileloc__rank'] = '';
       $form_state['values'][$field_name]['und'][$delta]['chado-fileloc__md5checksum'] = '';
     }

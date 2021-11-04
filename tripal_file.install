@@ -37,7 +37,6 @@ function tripal_file_install() {
   tripal_file_add_file_contact_table();
   tripal_file_add_fileloc_table();
   tripal_file_add_fileprop_table();
-  tripal_file_add_fileloc_table();
   tripal_file_add_file_license_table();
   tripal_file_add_linker_tables();
 
@@ -175,8 +174,8 @@ function tripal_file_add_terms() {
     'cv_name' => 'schema',
     'definition' => 'Current location of the item.',
   ]);
-
 }
+
 /**
  * Adds Tripal v3 content types.
  */
@@ -367,6 +366,7 @@ function tripal_file_add_fileloc_table(){
   ];
   chado_create_custom_table('fileloc', $schema, TRUE, NULL, FALSE);
 }
+
 /**
  *
  */
@@ -420,8 +420,6 @@ function tripal_file_add_fileprop_table(){
   ];
   chado_create_custom_table('fileprop', $schema, TRUE, NULL, FALSE);
 }
-
-
 
 /**
  *
@@ -595,4 +593,74 @@ function tripal_file_add_linker_tables_terms() {
     $term = chado_get_cvterm(['id' => 'OBCS:0000117']);
     chado_associate_semweb_term($linker_table, 'rank', $term);
   }
+}
+
+/**
+ * Add 'display_name' column to fileloc table and associated semantic web term
+ */
+function tripal_file_update_7000() {
+  // definition for the column we are adding to the chado.fileloc table
+  $display_name_schema = [
+    'type' => 'text',
+    'not null' => FALSE,
+    'description' => t('The short name of the uri as displayed to the user.'),
+  ];
+  // definition for cvterm SIO:000116 = 'name'
+  $name_term = [
+    'id' => 'SIO:000116',
+    'name' => 'name',
+    'cv_name' => 'SIO',
+    'definition' => 'A name is a label used to identify an entity.',
+  ];
+
+  $transaction = db_transaction();
+  try {
+
+    // Add 'display_name' column to fileloc table, this holds the name presented to user
+    if (!db_field_exists('chado.fileloc', 'display_name')) {
+      db_add_field('chado.fileloc', 'display_name', $display_name_schema);
+    }
+
+    // Make sure the CV term for this new column exists
+    $term = chado_insert_cvterm($name_term, ['update_existing' => false]);
+    $name_cvterm_id = $term->cvterm_id;
+
+    // Retrieve the table_id of the fileloc custom table, this will be
+    // needed to update the schema
+    $sql = "SELECT table_id FROM [tripal_custom_tables] WHERE table_name='fileloc'";
+    $fileloc_table_id = chado_query($sql, [])->fetchObject()->table_id;
+
+    // Update the schema to add the new column for the fileloc custom table
+    // by getting the current schema, adding in display_name schema, and updating
+    // the schema stored in public.tripal_custom_tables
+    $schema = chado_get_schema('fileloc');
+    $schema['fields']['display_name'] = $display_name_schema;
+    $fields = ['schema' => serialize($schema)];
+    db_update('tripal_custom_tables')
+      ->fields($fields)
+      ->condition('table_id', $fileloc_table_id, '=')
+      ->execute();
+
+    // Add the new semantic web term for the new database column.
+    // The preferred method has a bug, see tripal issue #1234
+    // $result = chado_associate_semweb_term('fileloc', 'display_name', ['cvterm_id' => $name_cvterm_id]);
+    // so instead, add the term directly.
+    if (!chado_get_semweb_term('fileloc', 'display_name')) {
+      $fields = [
+        'chado_table' => 'fileloc',
+        'chado_column' => 'display_name',
+        'cvterm_id' => $name_cvterm_id
+      ];
+      $result = db_insert('chado_semweb')
+        ->fields($fields)
+        ->execute();
+    }
+
+  }
+  catch (\PDOException $e) {
+    $transaction->rollback();
+    $error = $e->getMessage();
+    throw new DrupalUpdateException($error);
+  }
+
 }

@@ -63,6 +63,7 @@ class schema__itemlocation extends ChadoField {
 
     $field_term = $this->getFieldTermID();
     $uri_term = chado_get_semweb_term('fileloc', 'uri');
+    $display_name_term = chado_get_semweb_term('fileloc', 'display_name');
     $rank_term = chado_get_semweb_term('fileloc', 'rank');
     $md5_term = chado_get_semweb_term('fileloc', 'md5checksum');
     $size_term = chado_get_semweb_term('fileloc', 'size');
@@ -84,6 +85,16 @@ class schema__itemlocation extends ChadoField {
             'type' => 'xs:string',
             'readonly' => FALSE,
             'required' => TRUE,
+          ],
+          $display_name_term => [
+            'searchable' => FALSE,
+            'label' => 'Display Name',
+            'help' => 'The file name displayed to the user',
+            'operations' => [],
+            'sortable' => FALSE,
+            'type' => 'xs:string',
+            'readonly' => FALSE,
+            'required' => FALSE,
           ],
           $rank_term => [
             'searchable' => FALSE,
@@ -137,6 +148,7 @@ class schema__itemlocation extends ChadoField {
     $base_table = $this->instance['settings']['base_table'];
 
     $uri_term = chado_get_semweb_term('fileloc', 'uri');
+    $display_name_term = chado_get_semweb_term('fileloc', 'display_name');
     $rank_term = chado_get_semweb_term('fileloc', 'rank');
     $md5_term = chado_get_semweb_term('fileloc', 'md5checksum');
     $size_term = chado_get_semweb_term('fileloc', 'size');
@@ -147,6 +159,7 @@ class schema__itemlocation extends ChadoField {
       'chado-fileloc__fileloc_id' => '',
       'chado-fileloc__file_id' => '',
       'chado-fileloc__uri' => '',
+      'chado-fileloc__display_name' => '',
       'chado-fileloc__rank' => '',
       'chado-fileloc__md5checksum' => '',
       'chado-fileloc__size' => '',
@@ -173,6 +186,7 @@ class schema__itemlocation extends ChadoField {
           $entity->{$field_name}['und'][$i] = [
             'value' => [
               $uri_term => $uri,
+              $display_name_term => $fileloc->display_name,
               $rank_term => $fileloc->rank,
               $md5_term => $fileloc->md5checksum,
               $size_term => $filesize,
@@ -180,6 +194,7 @@ class schema__itemlocation extends ChadoField {
             'chado-fileloc__fileloc_id' => $fileloc->fileloc_id,
             'chado-fileloc__file_id' => $fileloc->file_id->file_id,
             'chado-fileloc__uri' => $fileloc->uri,
+            'chado-fileloc__display_name' => $fileloc->display_name,
             'chado-fileloc__rank' => $fileloc->rank,
             'chado-fileloc__md5checksum' => $fileloc->md5checksum,
             'chado-fileloc__size' => $fileloc->size,
