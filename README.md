@@ -1,5 +1,6 @@
 # The Tripal File Extension Module
 [![Documentation Status](https://readthedocs.org/projects/tripal_file/badge/?version=latest)](https://tripal-file.readthedocs.io/en/latest/?badge=latest)
+[![DOI](https://zenodo.org/badge/221995548.svg)](https://zenodo.org/badge/latestdoi/221995548)
 
 The Tripal File module supports association of data files with content in a Chado database and for integration of those associations with content types on a Tripal website.
 
