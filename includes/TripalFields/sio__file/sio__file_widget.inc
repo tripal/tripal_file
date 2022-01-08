@@ -30,7 +30,10 @@ class sio__file_widget extends ChadoFieldWidget {
     // Set defaults.
     $record_id = '';
     $file_id = '';
-    $fk_id = $record->$fkey_lcolumn;
+    $fk_id = NULL;
+    if ($record) {
+      $fk_id = $record->$fkey_lcolumn;
+    }
     $rank = $delta;
 
 

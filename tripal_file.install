@@ -49,6 +49,8 @@ function tripal_file_install() {
 
   // Associate terms with the linker tables.
   tripal_file_add_linker_tables_terms();
+
+  tripal_file_add_default_licenses();
 }
 
 /**
@@ -231,6 +233,7 @@ function tripal_file_add_file_table() {
     'table' => 'file',
     'fields' => [
       'file_id' => [
+        'size' => 'big',
         'type' => 'serial',
         'not null' => TRUE,
       ],
@@ -275,6 +278,7 @@ function tripal_file_add_file_contact_table(){
     'table' => 'file_contact',
     'fields' => [
       'file_contact_id' => [
+        'size' => 'big',
         'type' => 'serial',
         'not null' => TRUE
       ],
@@ -320,6 +324,7 @@ function tripal_file_add_fileloc_table(){
     'table' => 'fileloc',
     'fields' => [
       'fileloc_id' => [
+        'size' => 'big',
         'type' => 'serial',
         'not null' => TRUE
       ],
@@ -375,6 +380,7 @@ function tripal_file_add_fileprop_table(){
     'table' => 'fileprop',
     'fields' => [
       'fileprop_id' => [
+        'size' => 'big',
         'type' => 'serial',
         'not null' => TRUE
       ],
@@ -431,6 +437,7 @@ function tripal_file_add_license_table(){
     'table' => 'license',
     'fields' => [
       'license_id' => [
+        'size' => 'big',
         'type' => 'serial',
         'not null' => TRUE
       ],
@@ -467,6 +474,7 @@ function tripal_file_add_file_license_table() {
     'table' => 'file_license',
     'fields' => [
       'file_license_id' => [
+        'size' => 'big',
         'type' => 'serial',
         'not null' => TRUE
       ],
@@ -535,14 +543,17 @@ function tripal_file_add_linker_tables() {
       'table' => $linker_table,
       'fields' => [
         $linker_table . '_id' => [
+          'size' => 'big',
           'type' => 'serial',
           'not null' => TRUE
         ],
         'file_id' => [
+          'size' => 'big',
           'type' => 'int',
           'not null' => TRUE
         ],
         $pkey => [
+          'size' => 'big',
           'type' => 'int',
           'not null' => TRUE
         ],
@@ -580,6 +591,45 @@ function tripal_file_add_linker_tables() {
 }
 
 /**
+ *
+ */
+function tripal_file_add_default_licenses() {
+
+  $license = new ChadoRecord('license');
+  $license->setValues([
+    'name' => 'Creative Commons Attribution 4.0 International Public License',
+  ]);
+  if (!$license->find()) {
+    $license->setValues([
+      'name' => 'Creative Commons Attribution 4.0 International Public License',
+      'summary' => 'You are free to copy and redistribute the material ' .
+      'in any medium or format, remix, transform, and build upon the '.
+      'material for any purpose, even commercially. The licensor cannot '.
+      'revoke these freedoms as long as you follow the license terms. ' .
+      'You must give appropriate credit, provide a link to the license, '.
+      'and indicate if changes were made. You may do so in any reasonable ' .
+      'manner, but not in any way that suggests the licensor endorses you ' .
+      'or your use. You may not apply legal terms or technological measures ' .
+      'that legally restrict others from doing anything the license permits.',
+      'uri' => 'https://creativecommons.org/licenses/by/4.0/legalcode',
+    ]);
+    $license->insert();
+  }
+
+  global $user;
+  $bundle = tripal_load_bundle_entity(['accession' => 'schema:license']);
+  $args = [
+    [
+      'bundle_name' => $bundle->name,
+      'filters' => [],
+    ],
+  ];
+  return tripal_add_job("Publish " . $bundle->label . " records.",
+      'tripal_chado', 'chado_publish_records', $args,
+      $user->uid, 10, $includes);
+}
+
+/**
  * Adds the terms for the linked table columns.
  */
 function tripal_file_add_linker_tables_terms() {
@@ -594,5 +644,27 @@ function tripal_file_add_linker_tables_terms() {
     // Add the term for rank.
     $term = chado_get_cvterm(['id' => 'OBCS:0000117']);
     chado_associate_semweb_term($linker_table, 'rank', $term);
+  }
+}
+
+/**
+ * Add default licenses
+ */
+function tripal_network_update_7100() {
+  try {
+    tripal_file_add_default_licenses();
+
+    global $user;
+    tripal_add_job(
+        'Repopulating db2cv to fix legacy SOFP',
+        'tripal_chado',
+        'chado_populate_mview',
+        [$mview_id],
+        $user->uid
+        );
+  }
+  catch (\PDOException $e) {
+    $error = $e->getMessage();
+    throw new DrupalUpdateException('Could not perform update: '. $error);
   }
 }
