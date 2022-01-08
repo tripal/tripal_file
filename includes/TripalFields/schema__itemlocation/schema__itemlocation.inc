@@ -161,12 +161,21 @@ class schema__itemlocation extends ChadoField {
       $fileloc_linkers = $record->fileloc;
       if ($fileloc_linkers) {
         foreach ($fileloc_linkers as $i => $fileloc) {
+          $filesize = $fileloc->size;  // integer or empty string
+          if (preg_match('/^\d+$/', $filesize)) {
+            $filesize = tripal_format_bytes($filesize);
+          }
+          // ftp:// won't pass through file_create_url()
+          $uri = file_create_url($fileloc->uri);
+          if (!$uri) {
+            $uri = $fileloc->uri;
+          }
           $entity->{$field_name}['und'][$i] = [
             'value' => [
-              $uri_term => file_create_url($fileloc->uri),
+              $uri_term => $uri,
               $rank_term => $fileloc->rank,
               $md5_term => $fileloc->md5checksum,
-              $size_term => tripal_format_bytes($fileloc->size),
+              $size_term => $filesize,
             ],
             'chado-fileloc__fileloc_id' => $fileloc->fileloc_id,
             'chado-fileloc__file_id' => $fileloc->file_id->file_id,

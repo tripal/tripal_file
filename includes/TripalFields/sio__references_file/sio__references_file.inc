@@ -37,7 +37,7 @@ class sio__references_file extends ChadoField {
     'term_fixed' => FALSE,
     // The table in Chado that the instance maps to.
     'chado_table' => 'file',
-    // The primary key column of hte table in Dhado.
+    // The primary key column of the table in Chado.
     'chado_column' => 'file_id',
     // The base table.
     'base_table' => 'file',
@@ -182,7 +182,7 @@ class sio__references_file extends ChadoField {
           // so... we'll do the best we can.
           $entity->{$field_name}['und'][$delta]['value'] = [];
 
-          // If this records is also a published entity then include that.
+          // If this record is also a published entity then include that.
           $ref_type = NULL;
           if (property_exists($record, 'entity_id') and !empty($record->entity_id)) {
             [$entity_id, $ref_type] = explode('|', $record->entity_id);
@@ -198,26 +198,32 @@ class sio__references_file extends ChadoField {
           }
 
           // Add in the name and uniquename (identifier) if those fields exist.
+          // If name does not exist, e.g. for publication, use title
+          if (property_exists($record, 'uniquename')) {
+            $entity->{$field_name}['und'][$delta]['value']['data:0842'] = $record->uniquename;
+          }
           if (property_exists($record, 'name')) {
             $entity->{$field_name}['und'][$delta]['value']['schema:name'] = $record->name;
           }
-          if (property_exists($record, 'uniquename')) {
-            $entity->{$field_name}['und'][$delta]['value']['data:0842'] = $record->name;
+          else if (property_exists($record, 'title')) {
+            $entity->{$field_name}['und'][$delta]['value']['schema:name'] = $record->title;
           }
-
+          else {
+            // if we reach here, a new handler needs to be added, but for now add a placeholder
+            $entity->{$field_name}['und'][$delta]['value']['schema:name'] = 'Link';
+          }
 
           // If this is the organism table then we will create the name
           // specially.
           if (property_exists($record, 'genus')) {
-            $name = '<i>' . $record->genus . ' ' . $record->species . '</i>';
-            if (property_exists($record, 'infraspecific_name')) {
-              if ($record->$fkleft->type_id) {
-                $name .= ' ' . $record->type_name;
-              }
-              $name .= ' ' . $record->infraspecific_name;
+            $name = $record->genus . ' ' . $record->species;
+            if (function_exists('chado_get_organism_scientific_name')) {
+              $name = chado_get_organism_scientific_name(chado_get_organism(['organism_id' => $record->organism_id], []));
             }
             $entity->{$field_name}['und'][$delta]['value']['schema:name'] = $name;
-            $entity->{$field_name}['und'][$delta]['value']['rdfs:type'] = $ref_type->name;
+            // revert back to $ref_type of 'Organism' because the type_id will be
+            // for the infraspecific type
+            $entity->{$field_name}['und'][$delta]['value']['rdfs:type'] = $ref_type;
           }
           $delta++;
         }

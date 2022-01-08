@@ -13,8 +13,8 @@ function tripal_file_requirements($phase) {
   $requirements = [];
   if ($phase == 'install') {
     if (!module_exists('tripal_core') and !module_exists('tripal')) {
-      $requirements['tripal_galaxy'] = [
-        'title' => "tripal_galaxy",
+      $requirements['tripal_file'] = [
+        'title' => "tripal_file",
         'value' => "ERROR: You must have Tripal v2 or v3 installed to use this module.",
         'severity' => REQUIREMENT_ERROR,
       ];
@@ -380,7 +380,6 @@ function tripal_file_add_fileprop_table(){
     'table' => 'fileprop',
     'fields' => [
       'fileprop_id' => [
-        'size' => 'big',
         'type' => 'serial',
         'not null' => TRUE
       ],
@@ -437,7 +436,6 @@ function tripal_file_add_license_table(){
     'table' => 'license',
     'fields' => [
       'license_id' => [
-        'size' => 'big',
         'type' => 'serial',
         'not null' => TRUE
       ],
@@ -474,7 +472,6 @@ function tripal_file_add_file_license_table() {
     'table' => 'file_license',
     'fields' => [
       'file_license_id' => [
-        'size' => 'big',
         'type' => 'serial',
         'not null' => TRUE
       ],

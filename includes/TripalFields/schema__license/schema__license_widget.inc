@@ -51,7 +51,7 @@ class schema__license_widget extends ChadoFieldWidget {
       '#title' => t('File License'),
       '#options' => $options,
       '#default_value' => $license_id,
-      '#description' => t('Please select a license that properly describes to the user their rights, priviledge and or usage permissions for this file.'),
+      '#description' => t('Please select a license that properly describes to the user their rights, privilege and or usage permissions for this file.'),
       '#required' => $element['#required'],
     ];
   }

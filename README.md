@@ -1,5 +1,6 @@
 # The Tripal File Extension Module
 [![Documentation Status](https://readthedocs.org/projects/tripal_file/badge/?version=latest)](https://tripal-file.readthedocs.io/en/latest/?badge=latest)
+[![DOI](https://zenodo.org/badge/221995548.svg)](https://zenodo.org/badge/latestdoi/221995548)
 
 The Tripal File module supports association of data files with content in a Chado database and for integration of those associations with content types on a Tripal website.
 
@@ -17,4 +18,4 @@ Development of the Tripal File module was funded by the [National Science Founda
 
 ## Documentation
 
-Please see the [online documentation](https://tripal-file.readthedocs.io/en/latest/) for installation and usage instructinos.
+Please see the [online documentation](https://tripal-file.readthedocs.io/en/latest/) for installation and usage instructions.
