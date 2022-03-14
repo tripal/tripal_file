@@ -37,7 +37,9 @@ function tripal_file_install() {
   tripal_file_add_file_contact_table();
   tripal_file_add_fileloc_table();
   tripal_file_add_fileprop_table();
+  tripal_file_add_fileloc_table();
   tripal_file_add_file_license_table();
+  tripal_file_add_file_pub_table();
   tripal_file_add_linker_tables();
 
   // Add the terms and content types.
@@ -48,6 +50,8 @@ function tripal_file_install() {
 
   // Associate terms with the linker tables.
   tripal_file_add_linker_tables_terms();
+
+  tripal_file_add_default_licenses();
 }
 
 /**
@@ -174,8 +178,8 @@ function tripal_file_add_terms() {
     'cv_name' => 'schema',
     'definition' => 'Current location of the item.',
   ]);
-}
 
+}
 /**
  * Adds Tripal v3 content types.
  */
@@ -230,6 +234,7 @@ function tripal_file_add_file_table() {
     'table' => 'file',
     'fields' => [
       'file_id' => [
+        'size' => 'big',
         'type' => 'serial',
         'not null' => TRUE,
       ],
@@ -274,6 +279,7 @@ function tripal_file_add_file_contact_table(){
     'table' => 'file_contact',
     'fields' => [
       'file_contact_id' => [
+        'size' => 'big',
         'type' => 'serial',
         'not null' => TRUE
       ],
@@ -314,11 +320,71 @@ function tripal_file_add_file_contact_table(){
 /**
  *
  */
+function tripal_file_add_file_pub_table() {
+  
+  $schema = [
+    'table' => 'file_pub',
+    'fields' => [
+      'file_pub_id' => [
+        'size' => 'big',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ],
+      'file_id' => [
+        'size' => 'big',
+        'type' => 'int',
+        'not null' => TRUE,
+      ],
+      'pub_id' => [
+        'size' => 'big',
+        'type' => 'int',
+        'not null' => TRUE,
+      ],
+    ],
+    'primary key' => [
+      0 => 'file_pub_id',
+    ],
+    'unique keys' => [
+      'file_pub_c1' => [
+        0 => 'file_id',
+        1 => 'pub_id',
+      ],
+    ],
+    'indexes' => [
+      'file_pub_idx1' => [
+        0 => 'file_id',
+      ],
+      'file_pub_idx2' => [
+        0 => 'pub_id',
+      ],
+    ],
+    'foreign keys' => [
+      'pub' => [
+        'table' => 'pub',
+        'columns' => [
+          'pub_id' => 'pub_id',
+        ],
+      ],
+      'file' => [
+        'table' => 'file',
+        'columns' => [
+          'file_id' => 'file_id',
+        ],
+      ],
+    ],
+  ];
+  chado_create_custom_table('file_pub', $schema, TRUE, NULL, FALSE);
+}
+
+/**
+ *
+ */
 function tripal_file_add_fileloc_table(){
   $schema = [
     'table' => 'fileloc',
     'fields' => [
       'fileloc_id' => [
+        'size' => 'big',
         'type' => 'serial',
         'not null' => TRUE
       ],
@@ -366,7 +432,6 @@ function tripal_file_add_fileloc_table(){
   ];
   chado_create_custom_table('fileloc', $schema, TRUE, NULL, FALSE);
 }
-
 /**
  *
  */
@@ -420,6 +485,8 @@ function tripal_file_add_fileprop_table(){
   ];
   chado_create_custom_table('fileprop', $schema, TRUE, NULL, FALSE);
 }
+
+
 
 /**
  *
@@ -533,14 +600,17 @@ function tripal_file_add_linker_tables() {
       'table' => $linker_table,
       'fields' => [
         $linker_table . '_id' => [
+          'size' => 'big',
           'type' => 'serial',
           'not null' => TRUE
         ],
         'file_id' => [
+          'size' => 'big',
           'type' => 'int',
           'not null' => TRUE
         ],
         $pkey => [
+          'size' => 'big',
           'type' => 'int',
           'not null' => TRUE
         ],
@@ -578,6 +648,45 @@ function tripal_file_add_linker_tables() {
 }
 
 /**
+ *
+ */
+function tripal_file_add_default_licenses() {
+
+  $license = new ChadoRecord('license');
+  $license->setValues([
+    'uri' => 'https://creativecommons.org/licenses/by/4.0/legalcode',
+  ]);
+  if (!$license->find()) {
+    $license->setValues([
+      'name' => 'Creative Commons Attribution 4.0 International Public License',
+      'summary' => 'You are free to copy and redistribute the material ' .
+      'in any medium or format, remix, transform, and build upon the '.
+      'material for any purpose, even commercially. The licensor cannot '.
+      'revoke these freedoms as long as you follow the license terms. ' .
+      'You must give appropriate credit, provide a link to the license, '.
+      'and indicate if changes were made. You may do so in any reasonable ' .
+      'manner, but not in any way that suggests the licensor endorses you ' .
+      'or your use. You may not apply legal terms or technological measures ' .
+      'that legally restrict others from doing anything the license permits.',
+      'uri' => 'https://creativecommons.org/licenses/by/4.0/legalcode',
+    ]);
+    $license->insert();
+  }
+
+  global $user;
+  $bundle = tripal_load_bundle_entity(['accession' => 'schema:license']);
+  $args = [
+    [
+      'bundle_name' => $bundle->name,
+      'filters' => [],
+    ],
+  ];
+  return tripal_add_job("Publish " . $bundle->label . " records.",
+      'tripal_chado', 'chado_publish_records', $args,
+      $user->uid, 10, $includes);
+}
+
+/**
  * Adds the terms for the linked table columns.
  */
 function tripal_file_add_linker_tables_terms() {
@@ -596,71 +705,23 @@ function tripal_file_add_linker_tables_terms() {
 }
 
 /**
- * Add 'display_name' column to fileloc table and associated semantic web term
+ * Add default licenses
  */
-function tripal_file_update_7000() {
-  // definition for the column we are adding to the chado.fileloc table
-  $display_name_schema = [
-    'type' => 'text',
-    'not null' => FALSE,
-    'description' => t('The short name of the uri as displayed to the user.'),
-  ];
-  // definition for cvterm SIO:000116 = 'name'
-  $name_term = [
-    'id' => 'SIO:000116',
-    'name' => 'name',
-    'cv_name' => 'SIO',
-    'definition' => 'A name is a label used to identify an entity.',
-  ];
-
-  $transaction = db_transaction();
+function tripal_file_update_7100() {
   try {
+    tripal_file_add_default_licenses();
 
-    // Add 'display_name' column to fileloc table, this holds the name presented to user
-    if (!db_field_exists('chado.fileloc', 'display_name')) {
-      db_add_field('chado.fileloc', 'display_name', $display_name_schema);
-    }
-
-    // Make sure the CV term for this new column exists
-    $term = chado_insert_cvterm($name_term, ['update_existing' => false]);
-    $name_cvterm_id = $term->cvterm_id;
-
-    // Retrieve the table_id of the fileloc custom table, this will be
-    // needed to update the schema
-    $sql = "SELECT table_id FROM [tripal_custom_tables] WHERE table_name='fileloc'";
-    $fileloc_table_id = chado_query($sql, [])->fetchObject()->table_id;
-
-    // Update the schema to add the new column for the fileloc custom table
-    // by getting the current schema, adding in display_name schema, and updating
-    // the schema stored in public.tripal_custom_tables
-    $schema = chado_get_schema('fileloc');
-    $schema['fields']['display_name'] = $display_name_schema;
-    $fields = ['schema' => serialize($schema)];
-    db_update('tripal_custom_tables')
-      ->fields($fields)
-      ->condition('table_id', $fileloc_table_id, '=')
-      ->execute();
-
-    // Add the new semantic web term for the new database column.
-    // The preferred method has a bug, see tripal issue #1234
-    // $result = chado_associate_semweb_term('fileloc', 'display_name', ['cvterm_id' => $name_cvterm_id]);
-    // so instead, add the term directly.
-    if (!chado_get_semweb_term('fileloc', 'display_name')) {
-      $fields = [
-        'chado_table' => 'fileloc',
-        'chado_column' => 'display_name',
-        'cvterm_id' => $name_cvterm_id
-      ];
-      $result = db_insert('chado_semweb')
-        ->fields($fields)
-        ->execute();
-    }
-
+    global $user;
+    tripal_add_job(
+        'Repopulating db2cv to fix legacy SOFP',
+        'tripal_chado',
+        'chado_populate_mview',
+        [$mview_id],
+        $user->uid
+        );
   }
   catch (\PDOException $e) {
-    $transaction->rollback();
     $error = $e->getMessage();
-    throw new DrupalUpdateException($error);
+    throw new DrupalUpdateException('Could not perform update: '. $error);
   }
-
 }
