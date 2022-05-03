@@ -64,7 +64,6 @@ class schema__itemlocation_formatter extends ChadoFieldFormatter {
        $size = $item['value'][$size_term] !== '0B' ? $item['value'][$size_term] : 'N/A';
        $md5 = $item['value'][$md5_term] !== '' ? $item['value'][$md5_term] : 'N/A';
 
-       $row = [$uri, $size, $md5];
        // ability to display file name as left column can be enabled in admin interface
        if ($display_file_name) {
          $display_name = '';
@@ -80,7 +79,12 @@ class schema__itemlocation_formatter extends ChadoFieldFormatter {
            // e.g. downloadSupplement?doi=10.123%2F456&file=filename.txt
            $display_name = preg_replace('/^.*\?/', '', $display_name);
          }
-         array_unshift($row, $display_name);
+         // When this column is enabled, the download link moves to the file name
+         $display_name = l($display_name, $fileloc[$uri_term]);
+         $row = [$display_name, $source, $size, $md5];
+       }
+       else {
+         $row = [$uri, $size, $md5];
        }
        $rows[] = $row;
      }
@@ -97,7 +101,7 @@ class schema__itemlocation_formatter extends ChadoFieldFormatter {
       'empty' => 'This file is currently not available for download.'
     ];
     if ($display_file_name) {
-      array_unshift($table['header'], 'File Name');
+      array_unshift($table['header'], 'Download File Name');
     }
     $content = theme_table($table);
 
