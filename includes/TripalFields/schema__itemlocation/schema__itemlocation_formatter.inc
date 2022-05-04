@@ -25,7 +25,7 @@ class schema__itemlocation_formatter extends ChadoFieldFormatter {
 
     $name_term = chado_get_semweb_term('fileloc', 'name');
     $uri_term = chado_get_semweb_term('fileloc', 'uri');
-    $display_name_term = chado_get_semweb_term('fileloc', 'display_name');
+    $filename_term = chado_get_semweb_term('fileloc', 'filename');
     $rank_term = chado_get_semweb_term('fileloc', 'rank');
     $md5_term = chado_get_semweb_term('fileloc', 'md5checksum');
     $size_term = chado_get_semweb_term('fileloc', 'size');
@@ -66,22 +66,22 @@ class schema__itemlocation_formatter extends ChadoFieldFormatter {
 
        // ability to display file name as left column can be enabled in admin interface
        if ($display_file_name) {
-         $display_name = '';
-         if (array_key_exists($display_name_term, $item['value'])) {
-           $display_name = $item['value'][$display_name_term];
+         $filename = '';
+         if (array_key_exists($filename_term, $item['value'])) {
+           $filename = $item['value'][$filename_term];
          }
-         // if an explicit display_name is not defined, construct a file name from the
+         // if an explicit file name is not defined, construct a file name from the
          // uri by removing the path portion e.g. "https://a/b/c.txt" becomes "c.txt"
-         if (!$display_name) {
-           $display_name = basename($fileloc[$uri_term]);
+         if (!$filename) {
+           $filename = basename($fileloc[$uri_term]);
            // URLs can be a messy POST with multiple parameters, which is hard to
            // simplify, but we can at least remove anything before a question mark
            // e.g. downloadSupplement?doi=10.123%2F456&file=filename.txt
-           $display_name = preg_replace('/^.*\?/', '', $display_name);
+           $filename = preg_replace('/^.*\?/', '', $filename);
          }
          // When this column is enabled, the download link moves to the file name
-         $display_name = l($display_name, $fileloc[$uri_term]);
-         $row = [$display_name, $source, $size, $md5];
+         $filename = l($filename, $fileloc[$uri_term]);
+         $row = [$filename, $source, $size, $md5];
        }
        else {
          $row = [$uri, $size, $md5];

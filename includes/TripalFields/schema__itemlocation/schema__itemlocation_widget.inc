@@ -18,7 +18,7 @@ class schema__itemlocation_widget extends ChadoFieldWidget {
     $record_id = '';
     $file_id = '';
     $uri = '';
-    $display_name = '';
+    $filename = '';
     $md5 = NULL;
     $size = NULL;
     $unmanaged = '';
@@ -31,7 +31,7 @@ class schema__itemlocation_widget extends ChadoFieldWidget {
     if (count($items) > 0 and array_key_exists($delta, $items)) {
       $file_id = tripal_get_field_item_keyval($items, $delta, 'chado-fileloc__file_id', $file_id);
       $uri = tripal_get_field_item_keyval($items, $delta, 'chado-fileloc__uri', $uri);
-      $display_name = tripal_get_field_item_keyval($items, $delta, 'chado-fileloc__display_name', $display_name);
+      $filename = tripal_get_field_item_keyval($items, $delta, 'chado-fileloc__filename', $filename);
       $rank = tripal_get_field_item_keyval($items, $delta, 'chado-fileloc__rank', $rank);
       $record_id = tripal_get_field_item_keyval($items, $delta, 'chado-fileloc__fileloc_id', $record_id);
       $md5 = tripal_get_field_item_keyval($items, $delta, 'chado-fileloc__md5checksum', $md5);
@@ -108,13 +108,13 @@ class schema__itemlocation_widget extends ChadoFieldWidget {
 
     // The display name option can be enabled in the admin settings.
     if ($display_file_name) {
-      $widget['chado-fileloc__display_name'] = [
+      $widget['chado-fileloc__filename'] = [
         '#type' => 'textfield',
-        '#title' => t('Display Name'),
+        '#title' => t('File Name'),
         '#description' => t('Enter an optional alternative name to display if there is no file name'
                            .' included in the URL. This applies only when file name display is'
                            .' enabled in the admin settings.'),
-        '#default_value' => $display_name,
+        '#default_value' => $filename,
         '#maxlength' => 500,
       ];
     }
@@ -199,7 +199,7 @@ class schema__itemlocation_widget extends ChadoFieldWidget {
     else {
       $form_state['values'][$field_name]['und'][$delta]['chado-fileloc__file_id'] = '';
       $form_state['values'][$field_name]['und'][$delta]['chado-fileloc__uri'] = '';
-      $form_state['values'][$field_name]['und'][$delta]['chado-fileloc__display_name'] = '';
+      $form_state['values'][$field_name]['und'][$delta]['chado-fileloc__filename'] = '';
       $form_state['values'][$field_name]['und'][$delta]['chado-fileloc__rank'] = '';
       $form_state['values'][$field_name]['und'][$delta]['chado-fileloc__md5checksum'] = '';
     }
