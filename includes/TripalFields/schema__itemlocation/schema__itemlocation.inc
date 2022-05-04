@@ -178,15 +178,16 @@ class schema__itemlocation extends ChadoField {
           if (preg_match('/^\d+$/', $filesize)) {
             $filesize = tripal_format_bytes($filesize);
           }
-          // ftp:// won't pass through file_create_url()
           $uri = file_create_url($fileloc->uri);
+          // ftp:// won't pass through file_create_url(), so use value directly.
           if (!$uri) {
             $uri = $fileloc->uri;
           }
+          $filename = $this->extractFileName($uri, $fileloc->filename);
           $entity->{$field_name}['und'][$i] = [
             'value' => [
               $uri_term => $uri,
-              $filename_term => $fileloc->filename,
+              $filename_term => $filename,
               $rank_term => $fileloc->rank,
               $md5_term => $fileloc->md5checksum,
               $size_term => $filesize,
@@ -194,7 +195,7 @@ class schema__itemlocation extends ChadoField {
             'chado-fileloc__fileloc_id' => $fileloc->fileloc_id,
             'chado-fileloc__file_id' => $fileloc->file_id->file_id,
             'chado-fileloc__uri' => $fileloc->uri,
-            'chado-fileloc__filename' => $fileloc->filename,
+            'chado-fileloc__filename' => $filename,
             'chado-fileloc__rank' => $fileloc->rank,
             'chado-fileloc__md5checksum' => $fileloc->md5checksum,
             'chado-fileloc__size' => $fileloc->size,
@@ -202,5 +203,21 @@ class schema__itemlocation extends ChadoField {
         }
       }
     }
+  }
+
+  /**
+   * Unless a file name is given, extract one from the uri.
+   */
+  private function extractFileName($uri, $filename) {
+    if (!$filename) {
+      // An explicit file name is not provided, so construct one from the uri
+      // by removing the path portion e.g. "https://a/b/c.txt" becomes "c.txt"
+      $filename = basename($uri);
+      // URLs can be a messy POST with multiple parameters, which is hard to
+      // simplify, but we can at least remove anything before a question mark,
+      // e.g. downloadSupplement?doi=10.123%2F456&file=filename.txt
+      $filename = preg_replace('/^.*\?/', '', $filename);
+    }
+    return($filename);
   }
 }
