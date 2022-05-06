@@ -775,20 +775,17 @@ function tripal_file_update_7100() {
  */
 function tripal_file_update_7101() {
 
-  // definition for the column we are adding to the fileloc table with this update.
-  $filename_schema = [
-    'type' => 'text',
-    'not null' => FALSE,
-    'description' => t('The short name of the uri as displayed to the user.'),
-  ];
-
   $transaction = db_transaction();
   try {
 
-    // Add 'filename' column to fileloc table, this holds the name presented to
+    // Add 'filename' column to fileloc table, this holds the filename presented to
     // the user. Do nothing if it already exists, as will occur on a new install.
-    if (!db_field_exists('chado.fileloc', 'filename')) {
-      db_add_field('chado.fileloc', 'filename', $filename_schema);
+    if (!chado_column_exists('fileloc', 'filename')) {
+      $sql = "ALTER TABLE ONLY {fileloc} ADD COLUMN filename TEXT";
+      chado_query($sql, []);
+      $sql = "COMMENT ON COLUMN {fileloc}.filename IS :comment";
+      $column_comment = 'The short name of the uri as displayed to the user.';
+      chado_query($sql, [':comment' => $column_comment]);
 
       // Retrieve the table_id of the fileloc custom table, this will be
       // needed to update the schema.
