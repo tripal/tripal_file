@@ -749,20 +749,29 @@ function tripal_file_add_linker_tables_terms() {
 }
 
 /**
+ * Repopulates db2cv materialized view.
+ */
+function tripal_file_repopulate_db2cv_mview($jobname='Repopulating db2cv_mview') {
+  global $user;
+  $sql = "SELECT mview_id FROM [tripal_mviews] WHERE modulename=:modulename AND name=:name";
+  $args = [':modulename' => 'tripal_chado', ':name' => 'db2cv_mview'];
+  $mview_id = chado_query($sql, $args)->fetchField();
+  tripal_add_job(
+    $jobname,
+    'tripal_chado',
+    'chado_populate_mview',
+    [$mview_id],
+    $user->uid
+  );
+}
+
+/**
  * Add default licenses
  */
 function tripal_file_update_7100() {
   try {
     tripal_file_add_default_licenses();
-
-    global $user;
-    tripal_add_job(
-        'Repopulating db2cv to fix legacy SOFP',
-        'tripal_chado',
-        'chado_populate_mview',
-        [$mview_id],
-        $user->uid
-        );
+    tripal_file_repopulate_db2cv_mview('Repopulating db2cv_mview to fix legacy SOFP');
   }
   catch (\PDOException $e) {
     $error = $e->getMessage();
