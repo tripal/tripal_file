@@ -1,9 +1,10 @@
 ;
 ; Provide details about your module in this file. Instruction for setup of this
-; file can be found here:  https:;drupal.org/node/542202
+; file can be found here:  https://drupal.org/node/542202
 ;
 name = Tripal File
 description = A module for associating files with Tripal content and for accessing files via web services.
+configure = admin/tripal/extension/tripal_file/config
 core = 7.x
 project = tripal_file
 package = Tripal Extensions

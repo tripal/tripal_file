@@ -12,13 +12,66 @@
 // API file, the theme file, or include files.
 require_once('api/tripal_file.api.inc');
 require_once('theme/tripal_file.theme.inc');
+require_once('includes/tripal_file.admin.inc');
 
+/**
+ * Implements hook_menu().
+ */
+function tripal_file_menu() {
+
+  // tripal file administration page
+  $items['admin/tripal/extension/tripal_file'] = [
+    'title' => 'Tripal File User Interface',
+    'description' => 'A module for associating files with Tripal content and for accessing files via web services.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => ['tripal_file_admin_form'],
+    'access arguments' => ['administer tripal'],
+    'type' => MENU_NORMAL_ITEM,
+  ];
+  $items['admin/tripal/extension/tripal_file/config'] = [
+    'title' => 'Configuration',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  ];
+  $items['admin/tripal/extension/tripal_file/help'] = [
+    'title' => 'Help',
+    'page callback' => 'theme',
+    'page arguments' => ['tripal_file_help'],
+    'access arguments' => ['administer tripal'],
+    'type' => MENU_LOCAL_TASK,
+  ];
+
+  return $items;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function tripal_file_theme() {
+
+  // Module Help
+  $path = drupal_get_path('module', 'tripal_file');
+  $items['tripal_file_help'] = [
+    'template' => 'tripal_file_help',
+    'path' => "$path/theme",
+  ];
+
+  return $items;
+}
+
+/**
+ * Implements hook_help().
+ */
+function tripal_file_help($path, $arg) {
+  if ($path == 'admin/help#tripal_file') {
+    return theme('tripal_file_help', []);
+  }
+}
 
 /**
  * Implements hook_views_api()
  *
  * This hook tells drupal that there is views support for
- * for this module which then automatically includes the tripal_db.views.inc
+ * this module which then automatically includes the tripal_db.views.inc
  * where all the views integration code is found.
  *
  * @ingroup tripal_file
@@ -268,7 +321,6 @@ function tripal_file_bundle_instances_info_alter(&$info, $bundle, $term) {
     $info['data__uri']['settings']['text_processing'] = '0';
   }
 }
-
 
 /**
  * Implements hook_tripal_default_title_format().
