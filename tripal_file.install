@@ -796,25 +796,48 @@ function tripal_file_update_7101() {
       $column_comment = 'The short name of the uri as displayed to the user.';
       chado_query($sql, [':comment' => $column_comment]);
 
-      // Retrieve the table_id of the fileloc custom table, this will be
-      // needed to update the schema.
-      $sql = "SELECT table_id FROM [tripal_custom_tables] WHERE table_name='fileloc'";
-      $fileloc_table_id = chado_query($sql, [])->fetchObject()->table_id;
-
-      // Update the schema to add the new column for the fileloc custom table
-      // by getting the current schema, adding in filename schema, and updating
-      // the schema stored in public.tripal_custom_tables.
-      $schema = chado_get_schema('fileloc');
-      $schema['fields']['filename'] = $filename_schema;
-      $fields = ['schema' => serialize($schema)];
-      db_update('tripal_custom_tables')
-        ->fields($fields)
-        ->condition('table_id', $fileloc_table_id, '=')
-        ->execute();
-
       // The CVterm for the new column is added as of this update, data:1050 = 'File name'.
       tripal_file_add_terms();
     }
+
+  }
+  catch (\PDOException $e) {
+    $transaction->rollback();
+    $error = $e->getMessage();
+    throw new DrupalUpdateException('Could not perform update: '. $error);
+  }
+
+}
+
+/**
+ * Add missing schema for filename column
+ */
+function tripal_file_update_7102() {
+
+  $filename_schema = [
+    'type' => 'text',
+    'not null' => FALSE,
+    'description' => t('The short name of the uri as displayed to the user.'),
+  ];
+
+  $transaction = db_transaction();
+  try {
+
+    // Retrieve the table_id of the fileloc custom table, this will be
+    // needed to update the schema.
+    $sql = "SELECT table_id FROM [tripal_custom_tables] WHERE table_name='fileloc'";
+    $fileloc_table_id = chado_query($sql, [])->fetchObject()->table_id;
+
+    // Update the schema to add the new column for the fileloc custom table
+    // by getting the current schema, adding in filename schema, and updating
+    // the schema stored in public.tripal_custom_tables.
+    $schema = chado_get_schema('fileloc');
+    $schema['fields']['filename'] = $filename_schema;
+    $fields = ['schema' => serialize($schema)];
+    db_update('tripal_custom_tables')
+      ->fields($fields)
+      ->condition('table_id', $fileloc_table_id, '=')
+      ->execute();
 
   }
   catch (\PDOException $e) {
