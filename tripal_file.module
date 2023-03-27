@@ -39,6 +39,15 @@ function tripal_file_menu() {
     'access arguments' => ['administer tripal'],
     'type' => MENU_LOCAL_TASK,
   ];
+  // Autocomplete for e.g. sbo__relationship widget.
+  $items['admin/tripal/storage/chado/auto_name/file/%'] = [
+    'page callback' => 'chado_autocomplete_file',
+    'page arguments' => [6],
+    'access arguments' => ['access content'],
+    'file' => 'api/tripal_file.api.inc',
+    'file path' => drupal_get_path('module', 'tripal_file'),
+    'type' => MENU_CALLBACK,
+  ];
 
   return $items;
 }

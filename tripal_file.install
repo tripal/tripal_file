@@ -37,6 +37,7 @@ function tripal_file_install() {
   tripal_file_add_file_contact_table();
   tripal_file_add_fileloc_table();
   tripal_file_add_fileprop_table();
+  tripal_file_add_file_relationship_table();
   tripal_file_add_file_license_table();
   tripal_file_add_file_pub_table();
   tripal_file_add_linker_tables();
@@ -501,6 +502,58 @@ function tripal_file_add_fileprop_table(){
 /**
  *
  */
+function tripal_file_add_file_relationship_table(){
+  $schema = [
+    'table' => 'file_relationship',
+    'fields' => [
+      'file_relationship_id' => [
+        'type' => 'serial',
+        'not null' => TRUE
+      ],
+      'subject_id' => [
+        'type' => 'int',
+        'not null' => TRUE
+      ],
+      'object_id' => [
+        'type' => 'int',
+        'not null' => TRUE
+      ],
+      'type_id' => [
+        'type' => 'int',
+        'not null' => TRUE
+      ],
+    ],
+    'primary key' => ['file_relationship_id'],
+    'unique keys' => [
+      'file_relationship_c1' => ['subject_id', 'object_id', 'type_id'],
+    ],
+    'indexes' => [
+      'file_relationship_idx1' => ['subject_id'],
+      'file_relationship_idx2' => ['object_id'],
+      'file_relationship_idx3' => ['type_id'],
+    ],
+    'foreign keys' => [
+      'file' => [
+        'table' => 'file',
+        'columns' => [
+          'subject_id' => 'file_id',
+          'object_id' => 'file_id',
+        ],
+      ],
+      'cvterm' => [
+        'table' => 'cvterm',
+        'columns' => [
+          'type_id' => 'cvterm_id',
+        ],
+      ],
+    ],
+  ];
+  chado_create_custom_table('file_relationship', $schema, TRUE, NULL, FALSE);
+}
+
+/**
+ *
+ */
 function tripal_file_add_license_table(){
   $schema = [
     'table' => 'license',
@@ -846,4 +899,20 @@ function tripal_file_update_7102() {
     throw new DrupalUpdateException('Could not perform update: '. $error);
   }
 
+}
+
+/**
+ * Add the file_relationship table.
+ */
+function tripal_file_update_7103() {
+
+  $transaction = db_transaction();
+  try {
+    tripal_file_add_file_relationship_table();
+  }
+  catch (\PDOException $e) {
+    $transaction->rollback();
+    $error = $e->getMessage();
+    throw new DrupalUpdateException('Could not perform update: '. $error);
+  }
 }
